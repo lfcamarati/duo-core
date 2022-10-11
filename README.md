@@ -1,2 +1,1 @@
 # duo-ui
-# duo-core
