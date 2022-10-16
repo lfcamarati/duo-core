@@ -8,8 +8,9 @@ import (
 
 func HandleRequest(router *gin.Engine) {
 	// Client
-	router.POST("/clients", client.NewClientPf)
+	router.POST("/clients", client.CreateClient)
 	router.GET("/clients", client.GetAll)
+	router.DELETE("/clients/:id", client.DeleteById)
 
 	// Service
 	router.GET("/services", service.GetAll)

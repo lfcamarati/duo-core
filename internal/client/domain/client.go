@@ -36,6 +36,10 @@ type Client struct {
 	Type    string `json:"type"`
 }
 
+func (c *Client) IsPf() bool {
+	return c.Type == "PF"
+}
+
 type ClientPf struct {
 	Client
 	Name string `json:"name"`
@@ -49,6 +53,7 @@ type ClientPj struct {
 }
 
 type ClientSearch struct {
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
@@ -57,4 +62,6 @@ type ClientRepository interface {
 	SavePf(client *ClientPf) (*int64, error)
 	SavePj(client *ClientPj) (*int64, error)
 	GetAll() ([]ClientSearch, error)
+	GetById(id int64) (*Client, error)
+	Delete(id int64) error
 }

@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/internal/client/infra/repository"
@@ -14,7 +15,7 @@ type ErrorMessage struct {
 	Message string
 }
 
-func NewClientPf(ctx *gin.Context) {
+func CreateClient(ctx *gin.Context) {
 	var err error
 
 	newClientInput := new(usecase.CreateClientInput)
@@ -65,6 +66,40 @@ func GetAll(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, ErrorMessage{Message: "Erro ao recuperar clientes: " + err.Error()})
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorMessage{Message: "Erro ao gravar dados: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, output)
+}
+
+func DeleteById(ctx *gin.Context) {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorMessage{Message: "Erro ao remover cliente: " + err.Error()})
+		return
+	}
+
+	tx, err := database.Db.BeginTx(context.TODO(), nil)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorMessage{Message: "Erro ao iniciar transação: " + err.Error()})
+		return
+	}
+	defer tx.Rollback()
+
+	input := usecase.DeleteClientInput{ID: id}
+	repository := repository.NewClientMysqlRepository(tx)
+	uc := usecase.NewDeleteClientUseCase(repository)
+	output, err := uc.Execute(input)
+
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, ErrorMessage{Message: "Erro ao remover cliente: " + err.Error()})
 		return
 	}
 
