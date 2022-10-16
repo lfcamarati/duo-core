@@ -1,0 +1,55 @@
+package client
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/lfcamarati/duo-core/internal/client/infra/repository"
+	"github.com/lfcamarati/duo-core/internal/client/usecase"
+	"github.com/lfcamarati/duo-core/pkg/database"
+)
+
+type ErrorMessage struct {
+	Message string
+}
+
+func NewClientPf(ctx *gin.Context) {
+	var err error
+
+	newClientInput := new(usecase.CreateClientInput)
+	err = ctx.Bind(newClientInput)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorMessage{Message: "Erro ao ler dados de entrada!"})
+		return
+	}
+
+	tx, err := database.Db.BeginTx(context.TODO(), nil)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorMessage{Message: "Erro ao iniciar transação: " + err.Error()})
+		return
+	}
+	defer tx.Rollback()
+
+	repository := repository.NewClientMysqlRepository(tx)
+	uc := usecase.NewCreateClientUseCase(repository)
+	output, err := uc.Execute(*newClientInput)
+
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, ErrorMessage{Message: "Erro ao cadastrar cliente: " + err.Error()})
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorMessage{Message: "Erro ao gravar dados: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, output)
+}
+
+func GetAll(context *gin.Context) {
+	context.JSON(http.StatusOK, make([]string, 0))
+}
