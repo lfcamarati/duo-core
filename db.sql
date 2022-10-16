@@ -3,6 +3,7 @@ CREATE TABLE client (
   address VARCHAR(255) NOT NULL,
   email VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
+  type VARCHAR(2) NOT NULL,
   PRIMARY KEY (id)
 )
 

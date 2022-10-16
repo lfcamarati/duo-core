@@ -50,6 +50,28 @@ func NewClientPf(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, output)
 }
 
-func GetAll(context *gin.Context) {
-	context.JSON(http.StatusOK, make([]string, 0))
+func GetAll(ctx *gin.Context) {
+	tx, err := database.Db.BeginTx(context.TODO(), nil)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorMessage{Message: "Erro ao iniciar transação: " + err.Error()})
+		return
+	}
+	defer tx.Rollback()
+
+	repository := repository.NewClientMysqlRepository(tx)
+	uc := usecase.NewGetAllClientsUseCase(repository)
+	output, err := uc.Execute(usecase.GetAllClientsInput{})
+
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, ErrorMessage{Message: "Erro ao recuperar clientes: " + err.Error()})
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorMessage{Message: "Erro ao gravar dados: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, output)
 }
