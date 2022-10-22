@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/internal/client/domain"
+	"github.com/lfcamarati/duo-core/domain/client/entity"
 )
 
-func NewDeleteClientUseCase(repository domain.ClientRepository) *DeleteClientUseCase {
+func NewDeleteClientUseCase(repository entity.ClientRepository) *DeleteClientUseCase {
 	return &DeleteClientUseCase{repository}
 }
 
@@ -15,7 +15,7 @@ type DeleteClientInput struct {
 type DeleteClientOutput struct{}
 
 type DeleteClientUseCase struct {
-	Repository domain.ClientRepository
+	Repository entity.ClientRepository
 }
 
 func (uc *DeleteClientUseCase) Execute(input DeleteClientInput) (*DeleteClientOutput, error) {

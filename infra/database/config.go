@@ -11,7 +11,7 @@ var (
 
 // https://go.dev/play/p/FAiGbqeJG0H
 // https://go.dev/doc/database/open-handle
-func DatabaseInit() {
+func Init() {
 	var err error
 	Db, err = sql.Open("mysql", "root:root@tcp(localhost:3306)/duo")
 

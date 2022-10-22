@@ -3,10 +3,10 @@ package usecase
 import (
 	"errors"
 
-	"github.com/lfcamarati/duo-core/internal/client/domain"
+	"github.com/lfcamarati/duo-core/domain/client/entity"
 )
 
-func NewCreateClientUseCase(repository domain.ClientRepository) *CreateClientUseCase {
+func NewCreateClientUseCase(repository entity.ClientRepository) *CreateClientUseCase {
 	return &CreateClientUseCase{repository}
 }
 
@@ -38,7 +38,7 @@ type CreateClientOutput struct {
 }
 
 type CreateClientUseCase struct {
-	Repository domain.ClientRepository
+	Repository entity.ClientRepository
 }
 
 func (uc *CreateClientUseCase) Execute(input CreateClientInput) (*CreateClientOutput, error) {
@@ -54,7 +54,7 @@ func (uc *CreateClientUseCase) Execute(input CreateClientInput) (*CreateClientOu
 }
 
 func (uc *CreateClientUseCase) createClientPf(input CreateClientInput) (*CreateClientOutput, error) {
-	clientPf := domain.NewClientPf(*input.Name, *input.Cpf, input.Address, input.Email, input.Phone, input.Type)
+	clientPf := entity.NewClientPf(*input.Name, *input.Cpf, input.Address, input.Email, input.Phone, input.Type)
 	ID, err := uc.Repository.SavePf(clientPf)
 
 	if err != nil {
@@ -65,7 +65,7 @@ func (uc *CreateClientUseCase) createClientPf(input CreateClientInput) (*CreateC
 }
 
 func (uc *CreateClientUseCase) createClientPj(input CreateClientInput) (*CreateClientOutput, error) {
-	clientPj := domain.NewClientPj(*input.CorporateName, *input.Cnpj, input.Address, input.Email, input.Phone, input.Type)
+	clientPj := entity.NewClientPj(*input.CorporateName, *input.Cnpj, input.Address, input.Email, input.Phone, input.Type)
 	ID, err := uc.Repository.SavePj(clientPj)
 
 	if err != nil {

@@ -1,21 +1,21 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/internal/client/domain"
+	"github.com/lfcamarati/duo-core/domain/client/entity"
 )
 
-func NewGetAllClientsUseCase(repository domain.ClientRepository) *GetAllClientsUseCase {
+func NewGetAllClientsUseCase(repository entity.ClientRepository) *GetAllClientsUseCase {
 	return &GetAllClientsUseCase{repository}
 }
 
 type GetAllClientsInput struct{}
 
 type GetAllClientsOutput struct {
-	Data *[]domain.ClientSearch `json:"data"`
+	Data *[]entity.ClientSearch `json:"data"`
 }
 
 type GetAllClientsUseCase struct {
-	Repository domain.ClientRepository
+	Repository entity.ClientRepository
 }
 
 func (uc *GetAllClientsUseCase) Execute(input GetAllClientsInput) (*GetAllClientsOutput, error) {

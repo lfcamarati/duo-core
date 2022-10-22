@@ -1,4 +1,4 @@
-package domain
+package entity
 
 func NewClientPf(name string, cpf string, address string, email string, phone string, clientType string) *ClientPf {
 	return &ClientPf{

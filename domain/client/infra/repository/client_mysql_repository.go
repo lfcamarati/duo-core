@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/lfcamarati/duo-core/internal/client/domain"
+	"github.com/lfcamarati/duo-core/domain/client/entity"
 )
 
 func NewClientMysqlRepository(tx *sql.Tx) *ClientMysqlRepository {
@@ -15,7 +15,7 @@ type ClientMysqlRepository struct {
 	Tx *sql.Tx
 }
 
-func (repository ClientMysqlRepository) SavePf(client *domain.ClientPf) (*int64, error) {
+func (repository ClientMysqlRepository) SavePf(client *entity.ClientPf) (*int64, error) {
 	id, err := repository.createClient(client.Client)
 
 	if err != nil {
@@ -37,7 +37,7 @@ func (repository ClientMysqlRepository) SavePf(client *domain.ClientPf) (*int64,
 	return id, nil
 }
 
-func (repository ClientMysqlRepository) SavePj(client *domain.ClientPj) (*int64, error) {
+func (repository ClientMysqlRepository) SavePj(client *entity.ClientPj) (*int64, error) {
 	id, err := repository.createClient(client.Client)
 
 	if err != nil {
@@ -59,7 +59,7 @@ func (repository ClientMysqlRepository) SavePj(client *domain.ClientPj) (*int64,
 	return id, nil
 }
 
-func (repository ClientMysqlRepository) createClient(client domain.Client) (*int64, error) {
+func (repository ClientMysqlRepository) createClient(client entity.Client) (*int64, error) {
 	clientStmt, err := repository.Tx.Prepare("INSERT INTO client (address, email, phone, type) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
@@ -81,7 +81,7 @@ func (repository ClientMysqlRepository) createClient(client domain.Client) (*int
 	return &id, nil
 }
 
-func (repository ClientMysqlRepository) GetAll() ([]domain.ClientSearch, error) {
+func (repository ClientMysqlRepository) GetAll() ([]entity.ClientSearch, error) {
 	rows, err := repository.Tx.Query(`
 		SELECT
 			c.id as "id",
@@ -100,10 +100,10 @@ func (repository ClientMysqlRepository) GetAll() ([]domain.ClientSearch, error) 
 		return nil, err
 	}
 
-	clients := make([]domain.ClientSearch, 0)
+	clients := make([]entity.ClientSearch, 0)
 
 	for rows.Next() {
-		var client domain.ClientSearch
+		var client entity.ClientSearch
 		err := rows.Scan(&client.ID, &client.Name, &client.Type)
 
 		if err != nil {
@@ -116,8 +116,8 @@ func (repository ClientMysqlRepository) GetAll() ([]domain.ClientSearch, error) 
 	return clients, nil
 }
 
-func (repository ClientMysqlRepository) GetById(id int64) (*domain.Client, error) {
-	client := new(domain.Client)
+func (repository ClientMysqlRepository) GetById(id int64) (*entity.Client, error) {
+	client := new(entity.Client)
 
 	err := repository.Tx.QueryRow("SELECT c.id, c.address, c.email, c.phone, c.type FROM client c WHERE c.id = ?", id).Scan(
 		&client.ID, &client.Address, &client.Email, &client.Phone, &client.Type)
