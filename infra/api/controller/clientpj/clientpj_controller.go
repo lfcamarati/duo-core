@@ -107,7 +107,7 @@ func GetAll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, output)
 }
 
-func DeleteById(ctx *gin.Context) {
+func Delete(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 
 	if err != nil {

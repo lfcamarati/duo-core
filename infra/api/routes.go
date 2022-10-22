@@ -13,17 +13,17 @@ func InitRoutes(router *gin.Engine) {
 	router.GET("/clients-pf/:id", clientPfController.GetById)
 	router.GET("/clients-pf", clientPfController.GetAll)
 	router.POST("/clients-pf", clientPfController.Create)
-	router.DELETE("/clients-pf/:id", clientPfController.DeleteById)
+	router.DELETE("/clients-pf/:id", clientPfController.Delete)
 
 	// ClientsPj
 	router.GET("/clients-pj/:id", clientPjController.GetById)
 	router.GET("/clients-pj", clientPjController.GetAll)
 	router.POST("/clients-pj", clientPjController.Create)
-	router.DELETE("/clients-pj/:id", clientPjController.DeleteById)
+	router.DELETE("/clients-pj/:id", clientPjController.Delete)
 
 	// Services
 	router.GET("/services/:id", serviceController.GetById)
 	router.GET("/services", serviceController.GetAll)
 	router.POST("/services", serviceController.Create)
-	router.DELETE("/services/:id", serviceController.DeleteById)
+	router.DELETE("/services/:id", serviceController.Delete)
 }
