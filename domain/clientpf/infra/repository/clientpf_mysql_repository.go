@@ -4,12 +4,10 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
-	client "github.com/lfcamarati/duo-core/domain/client/entity"
-	clientRepository "github.com/lfcamarati/duo-core/domain/client/infra/repository"
 	"github.com/lfcamarati/duo-core/domain/clientpf/entity"
 )
 
-func NewClientPfMysqlRepository(tx *sql.Tx) entity.ClientPfRepository {
+func NewClientPfRepository(tx *sql.Tx) entity.ClientPfRepository {
 	return ClientPfMysqlRepository{tx}
 }
 
@@ -18,15 +16,19 @@ type ClientPfMysqlRepository struct {
 }
 
 func (repository ClientPfMysqlRepository) Save(clientpf entity.ClientPf) (*int64, error) {
-	client := client.Client{
-		Address: clientpf.Address,
-		Email:   clientpf.Email,
-		Phone:   clientpf.Phone,
-		Type:    clientpf.Type,
+	stmt, err := repository.Tx.Prepare("INSERT INTO client (address, email, phone, type) VALUES (?, ?, ?, ?)")
+
+	if err != nil {
+		return nil, err
 	}
 
-	clientRepo := clientRepository.NewClientMysqlRepository(repository.Tx)
-	id, err := clientRepo.Save(client)
+	rs, err := stmt.Exec(clientpf.Address, clientpf.Email, clientpf.Phone, clientpf.Type)
+
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := rs.LastInsertId()
 
 	if err != nil {
 		return nil, err
@@ -44,7 +46,7 @@ func (repository ClientPfMysqlRepository) Save(clientpf entity.ClientPf) (*int64
 		return nil, err
 	}
 
-	return id, nil
+	return &id, nil
 }
 
 func (repository ClientPfMysqlRepository) GetAll() ([]entity.ClientPf, error) {
@@ -115,8 +117,7 @@ func (repository ClientPfMysqlRepository) Delete(id int64) error {
 		return err
 	}
 
-	clientRepo := clientRepository.NewClientMysqlRepository(repository.Tx)
-	err = clientRepo.Delete(id)
+	_, err = repository.Tx.Exec("DELETE FROM client WHERE id = ?", id)
 
 	if err != nil {
 		return err

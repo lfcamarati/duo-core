@@ -9,7 +9,7 @@ import (
 	"github.com/lfcamarati/duo-core/domain/clientpj/entity"
 )
 
-func NewClientPjMysqlRepository(tx *sql.Tx) entity.ClientPjRepository {
+func NewClientPjRepository(tx *sql.Tx) entity.ClientPjRepository {
 	return ClientPjMysqlRepository{tx}
 }
 

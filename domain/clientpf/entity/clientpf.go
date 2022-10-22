@@ -13,13 +13,13 @@ func NewClientPf(name string, cpf string, address string, email string, phone st
 }
 
 type ClientPf struct {
-	ID      *int64 `json:"id"`
-	Type    string `json:"type"`
-	Name    string `json:"name"`
-	Cpf     string `json:"cpf"`
-	Address string `json:"address"`
-	Email   string `json:"email"`
-	Phone   string `json:"phone"`
+	ID      *int64
+	Type    string
+	Name    string
+	Cpf     string
+	Address string
+	Email   string
+	Phone   string
 }
 
 type ClientPfRepository interface {

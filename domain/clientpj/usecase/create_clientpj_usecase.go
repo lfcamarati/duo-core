@@ -25,7 +25,7 @@ type CreateClientPjUseCase struct {
 	Repository entity.ClientPjRepository
 }
 
-func (uc *CreateClientPjUseCase) Execute(input CreateClientPjInput) (*CreateClientPjOutput, error) {
+func (uc *CreateClientPjUseCase) Execute(input *CreateClientPjInput) (*CreateClientPjOutput, error) {
 	clientPj := entity.NewClientPj(input.CorporateName, input.Cnpj, input.Address, input.Email, input.Phone)
 	ID, err := uc.Repository.Save(clientPj)
 

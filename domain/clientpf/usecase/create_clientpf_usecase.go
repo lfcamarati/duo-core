@@ -24,7 +24,7 @@ type CreateClientPfUseCase struct {
 	Repository entity.ClientPfRepository
 }
 
-func (uc *CreateClientPfUseCase) Execute(input CreateClientPfInput) (*CreateClientPfOutput, error) {
+func (uc *CreateClientPfUseCase) Execute(input *CreateClientPfInput) (*CreateClientPfOutput, error) {
 	clientPf := entity.NewClientPf(input.Name, input.Cpf, input.Address, input.Email, input.Phone)
 	ID, err := uc.Repository.Save(clientPf)
 
