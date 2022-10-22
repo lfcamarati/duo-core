@@ -22,3 +22,11 @@ CREATE TABLE client_pj (
   PRIMARY KEY (id),
   FOREIGN KEY (id) REFERENCES client(id)
 )
+
+CREATE TABLE service (
+  id INT NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  description VARCHAR(255),
+  price DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (id)
+)

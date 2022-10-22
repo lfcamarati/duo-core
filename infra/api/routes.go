@@ -22,5 +22,8 @@ func InitRoutes(router *gin.Engine) {
 	router.DELETE("/clients-pj/:id", clientPjController.DeleteById)
 
 	// Services
+	router.GET("/services/:id", serviceController.GetById)
 	router.GET("/services", serviceController.GetAll)
+	router.POST("/services", serviceController.Create)
+	router.DELETE("/services/:id", serviceController.DeleteById)
 }
