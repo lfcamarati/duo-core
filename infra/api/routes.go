@@ -3,12 +3,16 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
+	clientController "github.com/lfcamarati/duo-core/infra/api/controller/client"
 	clientPfController "github.com/lfcamarati/duo-core/infra/api/controller/clientpf"
 	clientPjController "github.com/lfcamarati/duo-core/infra/api/controller/clientpj"
 	serviceController "github.com/lfcamarati/duo-core/infra/api/controller/service"
 )
 
 func InitRoutes(router *gin.Engine) {
+	// Clients
+	router.GET("/clients", clientController.GetAll)
+
 	// ClientsPf
 	router.GET("/clients-pf/:id", clientPfController.GetById)
 	router.GET("/clients-pf", clientPfController.GetAll)

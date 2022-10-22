@@ -1,65 +1,47 @@
 package usecase
 
 import (
-	clientPf "github.com/lfcamarati/duo-core/domain/clientpf/entity"
-	clientPj "github.com/lfcamarati/duo-core/domain/clientpj/entity"
+	"github.com/lfcamarati/duo-core/domain/client/entity"
 )
 
-func NewGetAllClientsUseCase(clientPfRepository clientPf.ClientPfRepository, clientPjRepository clientPj.ClientPjRepository) *GetAllClientsUseCase {
-	return &GetAllClientsUseCase{clientPfRepository, clientPjRepository}
+func NewGetAllClientsUseCase(repository entity.ClientRepository) *GetAllClientsUseCase {
+	return &GetAllClientsUseCase{repository}
 }
 
-type GetAllClientsInput struct{}
+type GetAllClientsUsecaseInput struct{}
 
-type ClientSearch struct {
+type ClientOutput struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
 
-type GetAllClientsOutput struct {
-	Data []ClientSearch `json:"data"`
+type GetAllClientsUsecaseOutput struct {
+	Data []ClientOutput `json:"data"`
 }
 
 type GetAllClientsUseCase struct {
-	ClientPfRepository clientPf.ClientPfRepository
-	ClientPjRepository clientPj.ClientPjRepository
+	Repository entity.ClientRepository
 }
 
-func (uc *GetAllClientsUseCase) Execute(input GetAllClientsInput) (*GetAllClientsOutput, error) {
-	clientsPf, err := uc.ClientPfRepository.GetAll()
+func (uc *GetAllClientsUseCase) Execute(input GetAllClientsUsecaseInput) (*GetAllClientsUsecaseOutput, error) {
+	clients, err := uc.Repository.GetAll()
 
 	if err != nil {
 		return nil, err
 	}
 
-	clientsPj, err := uc.ClientPjRepository.GetAll()
+	clientsOutput := make([]ClientOutput, 0)
 
-	if err != nil {
-		return nil, err
-	}
-
-	clients := make([]ClientSearch, 0)
-
-	for _, pf := range clientsPf {
-		client := ClientSearch{
+	for _, pf := range clients {
+		clientOutput := ClientOutput{
 			ID:   *pf.ID,
 			Name: pf.Name,
 			Type: pf.Type,
 		}
 
-		clients = append(clients, client)
+		clientsOutput = append(clientsOutput, clientOutput)
 	}
 
-	for _, pj := range clientsPj {
-		client := ClientSearch{
-			ID:   *pj.ID,
-			Name: pj.CorporateName,
-			Type: pj.Type,
-		}
-
-		clients = append(clients, client)
-	}
-
-	return &GetAllClientsOutput{clients}, nil
+	return &GetAllClientsUsecaseOutput{clientsOutput}, nil
 }
