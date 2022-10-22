@@ -4,19 +4,29 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/lfcamarati/duo-core/domain/client/entity"
+	client "github.com/lfcamarati/duo-core/domain/client/entity"
+	clientRepository "github.com/lfcamarati/duo-core/domain/client/infra/repository"
+	"github.com/lfcamarati/duo-core/domain/clientpf/entity"
 )
 
-func NewClientMysqlRepository(tx *sql.Tx) *ClientMysqlRepository {
-	return &ClientMysqlRepository{tx}
+func NewClientPfMysqlRepository(tx *sql.Tx) entity.ClientPfRepository {
+	return ClientPfMysqlRepository{tx}
 }
 
-type ClientMysqlRepository struct {
+type ClientPfMysqlRepository struct {
 	Tx *sql.Tx
 }
 
-func (repository ClientMysqlRepository) SavePf(client *entity.ClientPf) (*int64, error) {
-	id, err := repository.createClient(client.Client)
+func (repository ClientPfMysqlRepository) Save(clientpf entity.ClientPf) (*int64, error) {
+	client := client.Client{
+		Address: clientpf.Address,
+		Email:   clientpf.Email,
+		Phone:   clientpf.Phone,
+		Type:    clientpf.Type,
+	}
+
+	clientRepo := clientRepository.NewClientMysqlRepository(repository.Tx)
+	id, err := clientRepo.Save(client)
 
 	if err != nil {
 		return nil, err
@@ -28,7 +38,7 @@ func (repository ClientMysqlRepository) SavePf(client *entity.ClientPf) (*int64,
 		return nil, err
 	}
 
-	_, err = clientPfStmt.Exec(id, client.Name, client.Cpf)
+	_, err = clientPfStmt.Exec(id, clientpf.Name, clientpf.Cpf)
 
 	if err != nil {
 		return nil, err
@@ -37,74 +47,30 @@ func (repository ClientMysqlRepository) SavePf(client *entity.ClientPf) (*int64,
 	return id, nil
 }
 
-func (repository ClientMysqlRepository) SavePj(client *entity.ClientPj) (*int64, error) {
-	id, err := repository.createClient(client.Client)
-
-	if err != nil {
-		return nil, err
-	}
-
-	clientPfStmt, err := repository.Tx.Prepare("INSERT INTO client_pj (id, corporate_name, cnpj) VALUES (?, ?, ?)")
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = clientPfStmt.Exec(id, client.CorporateName, client.Cnpj)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return id, nil
-}
-
-func (repository ClientMysqlRepository) createClient(client entity.Client) (*int64, error) {
-	clientStmt, err := repository.Tx.Prepare("INSERT INTO client (address, email, phone, type) VALUES (?, ?, ?, ?)")
-
-	if err != nil {
-		return nil, err
-	}
-
-	rs, err := clientStmt.Exec(client.Address, client.Email, client.Phone, client.Type)
-
-	if err != nil {
-		return nil, err
-	}
-
-	id, err := rs.LastInsertId()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &id, nil
-}
-
-func (repository ClientMysqlRepository) GetAll() ([]entity.ClientSearch, error) {
+func (repository ClientPfMysqlRepository) GetAll() ([]entity.ClientPf, error) {
 	rows, err := repository.Tx.Query(`
 		SELECT
 			c.id as "id",
-			CASE
-				WHEN c.type = 'PF' THEN pf.name
-				ELSE pj.corporate_name
-			END as "name",
-			c.type as "type"
+			c.type as "type",
+			pf.name as "name",
+			pf.cpf as "cpf",
+			c.address as "address",
+			c.email as "email",
+			c.phone as "phone"
 		FROM 
 			client c
-			left join client_pf pf on pf.id = c.id
-			left join client_pj pj on pj.id = c.id
+			inner join client_pf pf on pf.id = c.id
 	`)
 
 	if err != nil {
 		return nil, err
 	}
 
-	clients := make([]entity.ClientSearch, 0)
+	clients := make([]entity.ClientPf, 0)
 
 	for rows.Next() {
-		var client entity.ClientSearch
-		err := rows.Scan(&client.ID, &client.Name, &client.Type)
+		var client entity.ClientPf
+		err := rows.Scan(&client.ID, &client.Type, &client.Name, &client.Cpf, &client.Address, &client.Email, &client.Phone)
 
 		if err != nil {
 			return nil, err
@@ -116,11 +82,24 @@ func (repository ClientMysqlRepository) GetAll() ([]entity.ClientSearch, error) 
 	return clients, nil
 }
 
-func (repository ClientMysqlRepository) GetById(id int64) (*entity.Client, error) {
-	client := new(entity.Client)
+func (repository ClientPfMysqlRepository) GetById(id int64) (*entity.ClientPf, error) {
+	client := new(entity.ClientPf)
 
-	err := repository.Tx.QueryRow("SELECT c.id, c.address, c.email, c.phone, c.type FROM client c WHERE c.id = ?", id).Scan(
-		&client.ID, &client.Address, &client.Email, &client.Phone, &client.Type)
+	err := repository.Tx.QueryRow(`
+		SELECT
+			c.id as "id",
+			c.type as "type",
+			pf.name as "name",
+			pf.cpf as "cpf",
+			c.address as "address",
+			c.email as "email",
+			c.phone as "phone"
+		FROM 
+			client c
+			inner join client_pf pf on pf.id = c.id
+		WHERE
+			c.id = ?
+	`, id).Scan(&client.ID, &client.Type, &client.Name, &client.Cpf, &client.Address, &client.Email, &client.Phone)
 
 	if err != nil {
 		return nil, err
@@ -129,28 +108,15 @@ func (repository ClientMysqlRepository) GetById(id int64) (*entity.Client, error
 	return client, nil
 }
 
-func (repository ClientMysqlRepository) Delete(id int64) error {
-	client, err := repository.GetById(id)
+func (repository ClientPfMysqlRepository) Delete(id int64) error {
+	_, err := repository.Tx.Exec("DELETE FROM client_pf WHERE id = ?", id)
 
 	if err != nil {
 		return err
 	}
 
-	if client.IsPf() {
-		_, err = repository.Tx.Exec("DELETE FROM client_pf WHERE id = ?", id)
-
-		if err != nil {
-			return err
-		}
-	} else {
-		_, err = repository.Tx.Exec("DELETE FROM client_pj WHERE id = ?", id)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = repository.Tx.Exec("DELETE FROM client WHERE id = ?", id)
+	clientRepo := clientRepository.NewClientMysqlRepository(repository.Tx)
+	err = clientRepo.Delete(id)
 
 	if err != nil {
 		return err

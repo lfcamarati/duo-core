@@ -9,8 +9,8 @@ import (
 
 func InitRoutes(router *gin.Engine) {
 	// Client
-	router.POST("/clients", clientController.CreateClient)
 	router.GET("/clients", clientController.GetAll)
+	router.POST("/clients", clientController.CreateClient)
 	router.DELETE("/clients/:id", clientController.DeleteById)
 
 	// Service

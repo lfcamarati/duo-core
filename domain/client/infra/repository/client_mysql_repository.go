@@ -7,66 +7,22 @@ import (
 	"github.com/lfcamarati/duo-core/domain/client/entity"
 )
 
-func NewClientMysqlRepository(tx *sql.Tx) *ClientMysqlRepository {
-	return &ClientMysqlRepository{tx}
+func NewClientMysqlRepository(tx *sql.Tx) entity.ClientRepository {
+	return ClientMysqlRepository{tx}
 }
 
 type ClientMysqlRepository struct {
 	Tx *sql.Tx
 }
 
-func (repository ClientMysqlRepository) SavePf(client *entity.ClientPf) (*int64, error) {
-	id, err := repository.createClient(client.Client)
+func (repository ClientMysqlRepository) Save(client entity.Client) (*int64, error) {
+	stmt, err := repository.Tx.Prepare("INSERT INTO client (address, email, phone, type) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
 		return nil, err
 	}
 
-	clientPfStmt, err := repository.Tx.Prepare("INSERT INTO client_pf (id, name, cpf) VALUES (?, ?, ?)")
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = clientPfStmt.Exec(id, client.Name, client.Cpf)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return id, nil
-}
-
-func (repository ClientMysqlRepository) SavePj(client *entity.ClientPj) (*int64, error) {
-	id, err := repository.createClient(client.Client)
-
-	if err != nil {
-		return nil, err
-	}
-
-	clientPfStmt, err := repository.Tx.Prepare("INSERT INTO client_pj (id, corporate_name, cnpj) VALUES (?, ?, ?)")
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = clientPfStmt.Exec(id, client.CorporateName, client.Cnpj)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return id, nil
-}
-
-func (repository ClientMysqlRepository) createClient(client entity.Client) (*int64, error) {
-	clientStmt, err := repository.Tx.Prepare("INSERT INTO client (address, email, phone, type) VALUES (?, ?, ?, ?)")
-
-	if err != nil {
-		return nil, err
-	}
-
-	rs, err := clientStmt.Exec(client.Address, client.Email, client.Phone, client.Type)
+	rs, err := stmt.Exec(client.Address, client.Email, client.Phone, client.Type)
 
 	if err != nil {
 		return nil, err
@@ -130,27 +86,7 @@ func (repository ClientMysqlRepository) GetById(id int64) (*entity.Client, error
 }
 
 func (repository ClientMysqlRepository) Delete(id int64) error {
-	client, err := repository.GetById(id)
-
-	if err != nil {
-		return err
-	}
-
-	if client.IsPf() {
-		_, err = repository.Tx.Exec("DELETE FROM client_pf WHERE id = ?", id)
-
-		if err != nil {
-			return err
-		}
-	} else {
-		_, err = repository.Tx.Exec("DELETE FROM client_pj WHERE id = ?", id)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = repository.Tx.Exec("DELETE FROM client WHERE id = ?", id)
+	_, err := repository.Tx.Exec("DELETE FROM client WHERE id = ?", id)
 
 	if err != nil {
 		return err
