@@ -49,6 +49,42 @@ func (repository ClientPjMysqlRepository) Save(clientpj entity.ClientPj) (*int64
 	return &id, nil
 }
 
+func (repository ClientPjMysqlRepository) Update(clientpj entity.ClientPj) error {
+	stmt, err := repository.Tx.Prepare(`
+		UPDATE client
+		SET address = ?, email = ?, phone = ?
+		WHERE id = ?
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(clientpj.Address, clientpj.Email, clientpj.Phone, clientpj.ID)
+
+	if err != nil {
+		return err
+	}
+
+	clientPfStmt, err := repository.Tx.Prepare(`
+		UPDATE client_pj
+		SET corporate_name = ?, cnpj = ?
+		WHERE id = ?
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = clientPfStmt.Exec(clientpj.CorporateName, clientpj.Cnpj, clientpj.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (repository ClientPjMysqlRepository) GetAll() ([]entity.ClientPj, error) {
 	rows, err := repository.Tx.Query(`
 		SELECT

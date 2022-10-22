@@ -13,7 +13,7 @@ import (
 )
 
 func Create(ctx *gin.Context) {
-	input := new(usecase.CreateClientPfInput)
+	input := new(usecase.CreateClientPfUsecaseInput)
 	err := ctx.Bind(input)
 
 	if err != nil {
@@ -35,6 +35,48 @@ func Create(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao cadastrar cliente: %s", err.Error()))
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao gravar dados: %s", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, output)
+}
+
+func Update(ctx *gin.Context) {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, fmt.Errorf("erro ao ler dados de entrada: %s", err.Error()))
+		return
+	}
+
+	input := new(usecase.UpdateClientPfUsecaseInput)
+	err = ctx.Bind(input)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, fmt.Errorf("erro ao ler dados de entrada: %s", err.Error()))
+		return
+	}
+
+	tx, err := database.Db.BeginTx(context.TODO(), nil)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
+		return
+	}
+	defer tx.Rollback()
+
+	input.ID = id
+	repository := repository.NewClientPfRepository(tx)
+	uc := usecase.NewUpdateClientPfUseCase(repository)
+	output, err := uc.Execute(input)
+
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao atualizar cliente: %s", err.Error()))
 		return
 	}
 

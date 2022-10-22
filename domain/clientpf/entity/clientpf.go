@@ -24,6 +24,7 @@ type ClientPf struct {
 
 type ClientPfRepository interface {
 	Save(client ClientPf) (*int64, error)
+	Update(client ClientPf) error
 	GetAll() ([]ClientPf, error)
 	GetById(id int64) (*ClientPf, error)
 	Delete(id int64) error

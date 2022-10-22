@@ -8,7 +8,7 @@ func NewCreateClientPfUseCase(repository entity.ClientPfRepository) *CreateClien
 	return &CreateClientPfUseCase{repository}
 }
 
-type CreateClientPfInput struct {
+type CreateClientPfUsecaseInput struct {
 	Name    string
 	Cpf     string
 	Address string
@@ -16,7 +16,7 @@ type CreateClientPfInput struct {
 	Phone   string
 }
 
-type CreateClientPfOutput struct {
+type CreateClientPfUsecaseOutput struct {
 	ID *int64
 }
 
@@ -24,7 +24,7 @@ type CreateClientPfUseCase struct {
 	Repository entity.ClientPfRepository
 }
 
-func (uc *CreateClientPfUseCase) Execute(input *CreateClientPfInput) (*CreateClientPfOutput, error) {
+func (uc *CreateClientPfUseCase) Execute(input *CreateClientPfUsecaseInput) (*CreateClientPfUsecaseOutput, error) {
 	clientPf := entity.NewClientPf(input.Name, input.Cpf, input.Address, input.Email, input.Phone)
 	ID, err := uc.Repository.Save(clientPf)
 
@@ -32,5 +32,5 @@ func (uc *CreateClientPfUseCase) Execute(input *CreateClientPfInput) (*CreateCli
 		return nil, err
 	}
 
-	return &CreateClientPfOutput{ID}, nil
+	return &CreateClientPfUsecaseOutput{ID}, nil
 }
