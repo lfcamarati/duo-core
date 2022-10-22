@@ -98,8 +98,10 @@ func GetAll(ctx *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	repository := clientRepository.NewClientMysqlRepository(tx)
-	uc := usecase.NewGetAllClientsUseCase(repository)
+	clientPfRepo := clientPfRepository.NewClientPfMysqlRepository(tx)
+	clientPjRepo := clientPjRepository.NewClientPjMysqlRepository(tx)
+
+	uc := usecase.NewGetAllClientsUseCase(clientPfRepo, clientPjRepo)
 	output, err := uc.Execute(usecase.GetAllClientsInput{})
 
 	if err != nil {

@@ -1,13 +1,9 @@
 package entity
 
-const (
-	ClientType string = "PF"
-)
-
 func NewClientPf(name string, cpf string, address string, email string, phone string) ClientPf {
 	return ClientPf{
 		ID:      nil,
-		Type:    ClientType,
+		Type:    "PF",
 		Name:    name,
 		Cpf:     cpf,
 		Address: address,
@@ -17,7 +13,7 @@ func NewClientPf(name string, cpf string, address string, email string, phone st
 }
 
 type ClientPf struct {
-	ID      *int32 `json:"id"`
+	ID      *int64 `json:"id"`
 	Type    string `json:"type"`
 	Name    string `json:"name"`
 	Cpf     string `json:"cpf"`
