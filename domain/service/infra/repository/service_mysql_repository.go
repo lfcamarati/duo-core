@@ -37,6 +37,26 @@ func (repository ServiceMysqlRepository) Save(service entity.Service) (*int64, e
 	return &id, nil
 }
 
+func (repository ServiceMysqlRepository) Update(service entity.Service) error {
+	stmt, err := repository.Tx.Prepare(`
+		UPDATE service
+		SET title = ?, description = ?, price = ?
+		WHERE id = ?
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(service.Title, service.Description, service.Price, service.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (repository ServiceMysqlRepository) GetAll() ([]entity.Service, error) {
 	rows, err := repository.Tx.Query(`
 		SELECT

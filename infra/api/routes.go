@@ -31,5 +31,6 @@ func InitRoutes(router *gin.Engine) {
 	router.GET("/services/:id", serviceController.GetById)
 	router.GET("/services", serviceController.GetAll)
 	router.POST("/services", serviceController.Create)
+	router.PUT("/services/:id", serviceController.Update)
 	router.DELETE("/services/:id", serviceController.Delete)
 }

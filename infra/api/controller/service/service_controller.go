@@ -46,6 +46,40 @@ func Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, output)
 }
 
+func Update(ctx *gin.Context) {
+	input := new(usecase.UpdateServiceUsecaseInput)
+	err := ctx.Bind(input)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, fmt.Errorf("erro ao ler dados de entrada: %s", err.Error()))
+		return
+	}
+
+	tx, err := database.Db.BeginTx(context.TODO(), nil)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
+		return
+	}
+	defer tx.Rollback()
+
+	repository := repository.NewServiceRepository(tx)
+	uc := usecase.NewUpdateServiceUsecase(repository)
+	output, err := uc.Execute(*input)
+
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao atualizar serviço: %s", err.Error()))
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao gravar dados: %s", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, output)
+}
+
 func GetById(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 
