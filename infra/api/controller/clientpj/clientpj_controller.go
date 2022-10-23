@@ -8,8 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/domain/clientpj/infra/repository"
-	"github.com/lfcamarati/duo-core/domain/clientpj/usecase"
 	"github.com/lfcamarati/duo-core/infra/database"
+	usecase "github.com/lfcamarati/duo-core/usecase/clientpj"
 )
 
 func Create(ctx *gin.Context) {

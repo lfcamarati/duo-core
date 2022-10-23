@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/domain/client/infra/repository"
-	"github.com/lfcamarati/duo-core/domain/client/usecase"
 	"github.com/lfcamarati/duo-core/infra/database"
+	usecase "github.com/lfcamarati/duo-core/usecase/client"
 )
 
 func GetAll(ctx *gin.Context) {
