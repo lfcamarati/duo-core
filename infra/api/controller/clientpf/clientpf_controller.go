@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
+	"github.com/lfcamarati/duo-core/infra/api/httpmessage"
 	"github.com/lfcamarati/duo-core/infra/database"
 	usecase "github.com/lfcamarati/duo-core/usecase/clientpf"
 )
@@ -34,7 +35,7 @@ func Create(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao cadastrar cliente: %s", err.Error()))
+		ctx.JSON(http.StatusUnprocessableEntity, httpmessage.ErrorMessage{Message: err.Error()})
 		return
 	}
 

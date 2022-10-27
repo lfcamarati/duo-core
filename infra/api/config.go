@@ -15,5 +15,7 @@ func Init() *gin.Engine {
 		AllowHeaders: []string{"Content-Type,access-control-allow-origin, access-control-allow-headers"},
 	}))
 
+	InitRoutes(router)
+
 	return router
 }
