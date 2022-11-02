@@ -7,25 +7,23 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
-	"github.com/lfcamarati/duo-core/infra/api/httpmessage"
+	"github.com/lfcamarati/duo-core/infra/api/handler"
 	"github.com/lfcamarati/duo-core/infra/database"
 	usecase "github.com/lfcamarati/duo-core/usecase/clientpf"
 )
 
-func Create(ctx *gin.Context) {
+func Create(ctx *gin.Context) handler.ResponseError {
 	input := new(usecase.CreateClientPfUsecaseInput)
 	err := ctx.Bind(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, httpmessage.ErrorMessage{Message: "erro ao ler dados de entrada: " + err.Error()})
-		return
+		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao iniciar transação: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -34,39 +32,35 @@ func Create(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, httpmessage.ErrorMessage{Message: "erro ao registrar cliente: " + err.Error()})
-		return
+		return handler.NewUsecaseError("Erro ao registrar cliente: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao gravar dados: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func Update(ctx *gin.Context) {
+func Update(ctx *gin.Context) handler.ResponseError {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, httpmessage.ErrorMessage{Message: "erro ao ler dados de entrada: " + err.Error()})
-		return
+		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
 	input := new(usecase.UpdateClientPfUsecaseInput)
 	err = ctx.Bind(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, httpmessage.ErrorMessage{Message: "erro ao ler dados de entrada: " + err.Error()})
-		return
+		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao iniciar transação: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -76,31 +70,28 @@ func Update(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, httpmessage.ErrorMessage{Message: "erro ao atualizar cliente: " + err.Error()})
-		return
+		return handler.NewUsecaseError("Erro ao atualizar cliente: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao gravar dados: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func GetById(ctx *gin.Context) {
+func GetById(ctx *gin.Context) handler.ResponseError {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao recuperar cliente: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao recuperar cliente: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao iniciar transação: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -110,24 +101,22 @@ func GetById(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, httpmessage.ErrorMessage{Message: "erro ao recuperar cliente pelo ID: " + err.Error()})
-		return
+		return handler.NewUsecaseError("Erro ao recuperar cliente pelo ID: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao gravar dados: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func GetAll(ctx *gin.Context) {
+func GetAll(ctx *gin.Context) handler.ResponseError {
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao iniciar transação: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -137,38 +126,34 @@ func GetAll(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, httpmessage.ErrorMessage{Message: "erro ao recuperar clientes: " + err.Error()})
-		return
+		return handler.NewUsecaseError("Erro ao recuperar clientes: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao gravar dados: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func Delete(ctx *gin.Context) {
+func Delete(ctx *gin.Context) handler.ResponseError {
 	textId := ctx.Params.ByName("id")
 
 	if textId == "" || textId == ":id" {
-		ctx.JSON(http.StatusNotFound, nil)
-		return
+		return handler.NewNotFoundError()
 	}
 
 	id, err := strconv.ParseInt(textId, 10, 64)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao remover cliente: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao remover cliente: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao iniciar transação: " + err.Error()})
-		return
+		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -178,14 +163,13 @@ func Delete(ctx *gin.Context) {
 	_, err = uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, httpmessage.ErrorMessage{Message: "Erro ao remover cliente: " + err.Error()})
-		return
+		return handler.NewUsecaseError("Erro ao remover cliente: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, httpmessage.ErrorMessage{Message: "erro ao remover cliente: " + err.Error()})
-		return
+		return handler.NewInternalServerError("erro ao remover cliente: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
+	return nil
 }

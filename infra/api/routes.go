@@ -7,6 +7,7 @@ import (
 	clientPfController "github.com/lfcamarati/duo-core/infra/api/controller/clientpf"
 	clientPjController "github.com/lfcamarati/duo-core/infra/api/controller/clientpj"
 	serviceController "github.com/lfcamarati/duo-core/infra/api/controller/service"
+	"github.com/lfcamarati/duo-core/infra/api/handler"
 )
 
 func InitRoutes(router *gin.Engine) {
@@ -14,11 +15,11 @@ func InitRoutes(router *gin.Engine) {
 	router.GET("/clients", clientController.GetAll)
 
 	// ClientsPf
-	router.GET("/clients-pf/:id", clientPfController.GetById)
-	router.GET("/clients-pf", clientPfController.GetAll)
-	router.POST("/clients-pf", clientPfController.Create)
-	router.PUT("/clients-pf/:id", clientPfController.Update)
-	router.DELETE("/clients-pf/:id", clientPfController.Delete)
+	router.GET("/clients-pf/:id", handler.ErrorHandler(clientPfController.GetById))
+	router.GET("/clients-pf", handler.ErrorHandler(clientPfController.GetAll))
+	router.POST("/clients-pf", handler.ErrorHandler(clientPfController.Create))
+	router.PUT("/clients-pf/:id", handler.ErrorHandler(clientPfController.Update))
+	router.DELETE("/clients-pf/:id", handler.ErrorHandler(clientPfController.Delete))
 
 	// ClientsPj
 	router.GET("/clients-pj/:id", clientPjController.GetById)
