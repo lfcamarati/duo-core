@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/lfcamarati/duo-core/domain/clientpf/entity"
 )
 
@@ -19,7 +21,17 @@ type DeleteClientPfUseCase struct {
 }
 
 func (uc *DeleteClientPfUseCase) Execute(input DeleteClientPfInput) (*DeleteClientPfOutput, error) {
-	err := uc.Repository.Delete(input.ID)
+	clientPf, err := uc.Repository.GetById(input.ID)
+
+	if err != nil {
+		return nil, errors.New("cliente não encontrado")
+	}
+
+	if clientPf == nil {
+		return nil, errors.New("cliente não encontrado")
+	}
+
+	err = uc.Repository.Delete(input.ID)
 
 	if err != nil {
 		return nil, err
