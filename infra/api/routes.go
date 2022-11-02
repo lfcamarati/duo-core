@@ -22,16 +22,16 @@ func InitRoutes(router *gin.Engine) {
 	router.DELETE("/clients-pf/:id", handler.ErrorHandler(clientPfController.Delete))
 
 	// ClientsPj
-	router.GET("/clients-pj/:id", clientPjController.GetById)
-	router.GET("/clients-pj", clientPjController.GetAll)
-	router.POST("/clients-pj", clientPjController.Create)
-	router.PUT("/clients-pj/:id", clientPjController.Update)
-	router.DELETE("/clients-pj/:id", clientPjController.Delete)
+	router.GET("/clients-pj/:id", handler.ErrorHandler(clientPjController.GetById))
+	router.GET("/clients-pj", handler.ErrorHandler(clientPjController.GetAll))
+	router.POST("/clients-pj", handler.ErrorHandler(clientPjController.Create))
+	router.PUT("/clients-pj/:id", handler.ErrorHandler(clientPjController.Update))
+	router.DELETE("/clients-pj/:id", handler.ErrorHandler(clientPjController.Delete))
 
 	// Services
-	router.GET("/services/:id", serviceController.GetById)
-	router.GET("/services", serviceController.GetAll)
-	router.POST("/services", serviceController.Create)
-	router.PUT("/services/:id", serviceController.Update)
-	router.DELETE("/services/:id", serviceController.Delete)
+	router.GET("/services/:id", handler.ErrorHandler(serviceController.GetById))
+	router.GET("/services", handler.ErrorHandler(serviceController.GetAll))
+	router.POST("/services", handler.ErrorHandler(serviceController.Create))
+	router.PUT("/services/:id", handler.ErrorHandler(serviceController.Update))
+	router.DELETE("/services/:id", handler.ErrorHandler(serviceController.Delete))
 }

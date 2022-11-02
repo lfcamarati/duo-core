@@ -37,5 +37,5 @@ func NewInternalServerError(error string) ResponseError {
 }
 
 func NewNotFoundError() ResponseError {
-	return NewJsonResponseError(http.StatusNotFound, "")
+	return NewJsonResponseError(http.StatusNotFound, "Registro não encontrado")
 }

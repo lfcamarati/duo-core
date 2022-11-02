@@ -2,30 +2,28 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/domain/service/infra/repository"
+	"github.com/lfcamarati/duo-core/infra/api/handler"
 	"github.com/lfcamarati/duo-core/infra/database"
 	usecase "github.com/lfcamarati/duo-core/usecase/service"
 )
 
-func Create(ctx *gin.Context) {
+func Create(ctx *gin.Context) handler.ResponseError {
 	input := new(usecase.CreateServiceUsecaseInput)
 	err := ctx.Bind(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, fmt.Errorf("erro ao ler dados de entrada: %s", err.Error()))
-		return
+		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -34,32 +32,29 @@ func Create(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao cadastrar serviço: %s", err.Error()))
-		return
+		return handler.NewUsecaseError("erro ao cadastrar serviço: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao gravar dados: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func Update(ctx *gin.Context) {
+func Update(ctx *gin.Context) handler.ResponseError {
 	input := new(usecase.UpdateServiceUsecaseInput)
 	err := ctx.Bind(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, fmt.Errorf("erro ao ler dados de entrada: %s", err.Error()))
-		return
+		return handler.NewBadRequest("erro ao ler dados de entrada: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -68,31 +63,28 @@ func Update(ctx *gin.Context) {
 	output, err := uc.Execute(*input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao atualizar serviço: %s", err.Error()))
-		return
+		return handler.NewUsecaseError("erro ao atualizar serviço: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao gravar dados: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func GetById(ctx *gin.Context) {
+func GetById(ctx *gin.Context) handler.ResponseError {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao recuperar serviço: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao recuperar serviço: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -102,24 +94,22 @@ func GetById(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao recuperar serviço pelo ID: %s", err.Error()))
-		return
+		return handler.NewUsecaseError("erro ao recuperar serviço pelo ID: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao gravar dados: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func GetAll(ctx *gin.Context) {
+func GetAll(ctx *gin.Context) handler.ResponseError {
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -129,31 +119,28 @@ func GetAll(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao recuperar serviços: %s", err.Error()))
-		return
+		return handler.NewUsecaseError("erro ao recuperar serviços: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao gravar dados: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
 
-func Delete(ctx *gin.Context) {
+func Delete(ctx *gin.Context) handler.ResponseError {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao remover serviço: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao remover serviço: " + err.Error())
 	}
 
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -163,14 +150,13 @@ func Delete(ctx *gin.Context) {
 	_, err = uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao remover serviço: %s", err.Error()))
-		return
+		return handler.NewUsecaseError("erro ao remover serviço: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao remover serviço: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("erro ao remover serviço: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
+	return nil
 }
