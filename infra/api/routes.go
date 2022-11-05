@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
+	authController "github.com/lfcamarati/duo-core/infra/api/controller/auth"
 	clientController "github.com/lfcamarati/duo-core/infra/api/controller/client"
 	clientPfController "github.com/lfcamarati/duo-core/infra/api/controller/clientpf"
 	clientPjController "github.com/lfcamarati/duo-core/infra/api/controller/clientpj"
@@ -11,27 +12,31 @@ import (
 )
 
 func InitRoutes(router *gin.Engine) {
+	// Auth
+	router.POST("/auth", handler.ErrorHandler(authController.Login))
+	router.GET("/auth", handler.DefaultHandler(authController.ValidateLogin))
+
 	// Clients
-	router.GET("/clients", clientController.GetAll)
+	router.GET("/clients", handler.DefaultHandler(clientController.GetAll))
 
 	// ClientsPf
-	router.GET("/clients-pf/:id", handler.ErrorHandler(clientPfController.GetById))
-	router.GET("/clients-pf", handler.ErrorHandler(clientPfController.GetAll))
-	router.POST("/clients-pf", handler.ErrorHandler(clientPfController.Create))
-	router.PUT("/clients-pf/:id", handler.ErrorHandler(clientPfController.Update))
-	router.DELETE("/clients-pf/:id", handler.ErrorHandler(clientPfController.Delete))
+	router.GET("/clients-pf/:id", handler.DefaultHandler(clientPfController.GetById))
+	router.GET("/clients-pf", handler.DefaultHandler(clientPfController.GetAll))
+	router.POST("/clients-pf", handler.DefaultHandler(clientPfController.Create))
+	router.PUT("/clients-pf/:id", handler.DefaultHandler(clientPfController.Update))
+	router.DELETE("/clients-pf/:id", handler.DefaultHandler(clientPfController.Delete))
 
 	// ClientsPj
-	router.GET("/clients-pj/:id", handler.ErrorHandler(clientPjController.GetById))
-	router.GET("/clients-pj", handler.ErrorHandler(clientPjController.GetAll))
-	router.POST("/clients-pj", handler.ErrorHandler(clientPjController.Create))
-	router.PUT("/clients-pj/:id", handler.ErrorHandler(clientPjController.Update))
-	router.DELETE("/clients-pj/:id", handler.ErrorHandler(clientPjController.Delete))
+	router.GET("/clients-pj/:id", handler.DefaultHandler(clientPjController.GetById))
+	router.GET("/clients-pj", handler.DefaultHandler(clientPjController.GetAll))
+	router.POST("/clients-pj", handler.DefaultHandler(clientPjController.Create))
+	router.PUT("/clients-pj/:id", handler.DefaultHandler(clientPjController.Update))
+	router.DELETE("/clients-pj/:id", handler.DefaultHandler(clientPjController.Delete))
 
 	// Services
-	router.GET("/services/:id", handler.ErrorHandler(serviceController.GetById))
-	router.GET("/services", handler.ErrorHandler(serviceController.GetAll))
-	router.POST("/services", handler.ErrorHandler(serviceController.Create))
-	router.PUT("/services/:id", handler.ErrorHandler(serviceController.Update))
-	router.DELETE("/services/:id", handler.ErrorHandler(serviceController.Delete))
+	router.GET("/services/:id", handler.DefaultHandler(serviceController.GetById))
+	router.GET("/services", handler.DefaultHandler(serviceController.GetAll))
+	router.POST("/services", handler.DefaultHandler(serviceController.Create))
+	router.PUT("/services/:id", handler.DefaultHandler(serviceController.Update))
+	router.DELETE("/services/:id", handler.DefaultHandler(serviceController.Delete))
 }

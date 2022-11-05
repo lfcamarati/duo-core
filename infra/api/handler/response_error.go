@@ -24,6 +24,10 @@ func NewJsonResponseError(code int, error string) ResponseError {
 	return JsonResponseError{code, error}
 }
 
+func NewNotAuthorizedError(error string) ResponseError {
+	return NewJsonResponseError(http.StatusUnauthorized, error)
+}
+
 func NewUsecaseError(error string) ResponseError {
 	return NewJsonResponseError(http.StatusUnprocessableEntity, error)
 }

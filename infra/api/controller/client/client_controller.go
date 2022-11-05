@@ -2,21 +2,20 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/domain/client/infra/repository"
+	"github.com/lfcamarati/duo-core/infra/api/handler"
 	"github.com/lfcamarati/duo-core/infra/database"
 	usecase "github.com/lfcamarati/duo-core/usecase/client"
 )
 
-func GetAll(ctx *gin.Context) {
+func GetAll(ctx *gin.Context) handler.ResponseError {
 	tx, err := database.Db.BeginTx(context.TODO(), nil)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao iniciar transação: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
 	}
 	defer tx.Rollback()
 
@@ -26,14 +25,13 @@ func GetAll(ctx *gin.Context) {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, fmt.Errorf("erro ao recuperar clientes: %s", err.Error()))
-		return
+		return handler.NewUsecaseError("Erro ao recuperar clientes: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("erro ao gravar dados: %s", err.Error()))
-		return
+		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
+	return nil
 }
