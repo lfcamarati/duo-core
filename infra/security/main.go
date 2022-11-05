@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/spf13/viper"
 )
-
-var secretKey = []byte("secret")
 
 func GenerateJWT(username string) (*string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -18,6 +17,7 @@ func GenerateJWT(username string) (*string, error) {
 	claims["authorized"] = true
 	claims["user"] = username
 
+	var secretKey = []byte(viper.GetString("jwt.secretKey"))
 	tokenString, err := token.SignedString(secretKey)
 
 	if err != nil {
@@ -39,6 +39,7 @@ func VerifyJWT(tokenString string) error {
 			return nil, errors.New("not Authorized")
 		}
 
+		var secretKey = []byte(viper.GetString("jwt.secretKey"))
 		return secretKey, nil
 	})
 

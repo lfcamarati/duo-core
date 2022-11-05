@@ -7,5 +7,8 @@
       "pass": "root" 
     }
   },
+  "jwt": {
+    "secretKey": "secret"
+  },
   "environment": "local"
 }
