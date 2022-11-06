@@ -8,6 +8,7 @@ import (
 	clientPfController "github.com/lfcamarati/duo-core/infra/api/controller/clientpf"
 	clientPjController "github.com/lfcamarati/duo-core/infra/api/controller/clientpj"
 	serviceController "github.com/lfcamarati/duo-core/infra/api/controller/service"
+	userController "github.com/lfcamarati/duo-core/infra/api/controller/user"
 	"github.com/lfcamarati/duo-core/infra/api/handler"
 )
 
@@ -15,6 +16,9 @@ func InitRoutes(router *gin.Engine) {
 	// Auth
 	router.POST("/auth", handler.ErrorHandler(authController.Login))
 	router.GET("/auth", handler.DefaultHandler(authController.ValidateLogin))
+
+	// Users
+	router.POST("/users", handler.DefaultHandler(userController.Create))
 
 	// Clients
 	router.GET("/clients", handler.DefaultHandler(clientController.GetAll))

@@ -3,12 +3,12 @@ package usecase
 import (
 	"errors"
 
-	"github.com/lfcamarati/duo-core/domain/user/entity"
+	"github.com/lfcamarati/duo-core/domain/user/infra/repository"
 	"github.com/lfcamarati/duo-core/infra/security"
 )
 
-func NewLoginUsecase(repository entity.UserRepository) LoginUserUsecase {
-	return LoginUserUsecase{repository}
+func NewLoginUsecase(repositoryFactory repository.UserRepositoryFactory) LoginUserUsecase {
+	return LoginUserUsecase{repositoryFactory}
 }
 
 type LoginUserUsecaseInput struct {
@@ -21,7 +21,7 @@ type LoginUserUsecaseOutput struct {
 }
 
 type LoginUserUsecase struct {
-	Repository entity.UserRepository
+	NewRepository repository.UserRepositoryFactory
 }
 
 func (uc *LoginUserUsecase) Execute(input *LoginUserUsecaseInput) (*LoginUserUsecaseOutput, error) {

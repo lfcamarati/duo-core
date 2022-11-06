@@ -10,8 +10,8 @@ import (
 	usecase "github.com/lfcamarati/duo-core/usecase/user"
 )
 
-func Login(ctx *gin.Context) handler.ResponseError {
-	input := new(usecase.LoginUserUsecaseInput)
+func Create(ctx *gin.Context) handler.ResponseError {
+	input := new(usecase.CreateUserUsecaseInput)
 	err := ctx.Bind(input)
 
 	if err != nil {
@@ -19,11 +19,11 @@ func Login(ctx *gin.Context) handler.ResponseError {
 	}
 
 	userRepo := repository.NewUserRepositoryFactory(database.Db)
-	uc := usecase.NewLoginUsecase(userRepo)
+	uc := usecase.NewCreateUserUsecase(userRepo)
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		return handler.NewNotAuthorizedError(err.Error())
+		return handler.NewUsecaseError("Erro ao registrar novo usuário: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)

@@ -5,7 +5,7 @@ CREATE TABLE client (
   phone VARCHAR(20) NOT NULL,
   type VARCHAR(2) NOT NULL,
   PRIMARY KEY (id)
-)
+);
 
 CREATE TABLE client_pf (
   id INT NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE client_pf (
   cpf VARCHAR(11) NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (id) REFERENCES client(id)
-)
+);
 
 CREATE TABLE client_pj (
   id INT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE client_pj (
   cnpj VARCHAR(14) NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (id) REFERENCES client(id)
-)
+);
 
 CREATE TABLE service (
   id INT NOT NULL AUTO_INCREMENT,
@@ -29,4 +29,13 @@ CREATE TABLE service (
   description VARCHAR(255),
   price DECIMAL(10,2) NOT NULL,
   PRIMARY KEY (id)
-)
+);
+
+CREATE TABLE user (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  username VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE (username)
+);
