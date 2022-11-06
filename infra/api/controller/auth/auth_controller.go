@@ -7,6 +7,7 @@ import (
 	"github.com/lfcamarati/duo-core/domain/user/infra/repository"
 	"github.com/lfcamarati/duo-core/infra/api/handler"
 	"github.com/lfcamarati/duo-core/infra/database"
+	"github.com/lfcamarati/duo-core/infra/security"
 	usecase "github.com/lfcamarati/duo-core/usecase/user"
 )
 
@@ -19,7 +20,8 @@ func Login(ctx *gin.Context) handler.ResponseError {
 	}
 
 	userRepo := repository.NewUserRepositoryFactory(database.Db)
-	uc := usecase.NewLoginUsecase(userRepo)
+	passwordEncrypt := security.NewDefaultPasswordEncrypt()
+	uc := usecase.NewLoginUsecase(userRepo, passwordEncrypt)
 	output, err := uc.Execute(input)
 
 	if err != nil {

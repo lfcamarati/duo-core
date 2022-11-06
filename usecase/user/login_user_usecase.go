@@ -7,8 +7,11 @@ import (
 	"github.com/lfcamarati/duo-core/infra/security"
 )
 
-func NewLoginUsecase(repositoryFactory repository.UserRepositoryFactory) LoginUserUsecase {
-	return LoginUserUsecase{repositoryFactory}
+func NewLoginUsecase(
+	repositoryFactory repository.UserRepositoryFactory,
+	passwordEncrypt security.PasswordEncrypt,
+) LoginUserUsecase {
+	return LoginUserUsecase{repositoryFactory, passwordEncrypt}
 }
 
 type LoginUserUsecaseInput struct {
@@ -21,11 +24,16 @@ type LoginUserUsecaseOutput struct {
 }
 
 type LoginUserUsecase struct {
-	NewRepository repository.UserRepositoryFactory
+	NewRepository   repository.UserRepositoryFactory
+	PasswordEncrypt security.PasswordEncrypt
 }
 
 func (uc *LoginUserUsecase) Execute(input *LoginUserUsecaseInput) (*LoginUserUsecaseOutput, error) {
-	if input.Username != "teste" || input.Password != "teste" {
+	repo := uc.NewRepository()
+
+	user, err := repo.FindByUsername(input.Username)
+
+	if (user == nil || err != nil) || !uc.PasswordEncrypt.CheckEncrypt(input.Password, user.Password) {
 		return nil, errors.New("not authorized")
 	}
 

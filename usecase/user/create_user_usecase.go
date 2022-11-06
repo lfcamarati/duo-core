@@ -5,10 +5,17 @@ import (
 
 	"github.com/lfcamarati/duo-core/domain/user/entity"
 	"github.com/lfcamarati/duo-core/domain/user/infra/repository"
+	"github.com/lfcamarati/duo-core/infra/security"
 )
 
-func NewCreateUserUsecase(repositoryFactory repository.UserRepositoryFactory) CreateUserUsecase {
-	return CreateUserUsecase{repositoryFactory}
+func NewCreateUserUsecase(
+	repositoryFactory repository.UserRepositoryFactory,
+	passwordEncrypt security.PasswordEncrypt,
+) CreateUserUsecase {
+	return CreateUserUsecase{
+		repositoryFactory,
+		passwordEncrypt,
+	}
 }
 
 type CreateUserUsecaseInput struct {
@@ -22,7 +29,8 @@ type CreateUserUsecaseOutput struct {
 }
 
 type CreateUserUsecase struct {
-	NewRepository repository.UserRepositoryFactory
+	NewRepository   repository.UserRepositoryFactory
+	PasswordEncrypt security.PasswordEncrypt
 }
 
 func (uc *CreateUserUsecase) Execute(input *CreateUserUsecaseInput) (*CreateUserUsecaseOutput, error) {
@@ -33,7 +41,8 @@ func (uc *CreateUserUsecase) Execute(input *CreateUserUsecaseInput) (*CreateUser
 	}
 	defer repo.Rollback()
 
-	newUser := entity.NewUser(input.Name, input.Username, input.Password)
+	encryptedPassword := uc.PasswordEncrypt.Encrypt(input.Password)
+	newUser := entity.NewUser(input.Name, input.Username, string(encryptedPassword))
 	id, err := repo.Save(context.TODO(), newUser)
 
 	if err != nil {

@@ -18,7 +18,7 @@ func InitRoutes(router *gin.Engine) {
 	router.GET("/auth", handler.DefaultHandler(authController.ValidateLogin))
 
 	// Users
-	router.POST("/users", handler.DefaultHandler(userController.Create))
+	router.POST("/users", handler.ErrorHandler(userController.Create))
 
 	// Clients
 	router.GET("/clients", handler.DefaultHandler(clientController.GetAll))

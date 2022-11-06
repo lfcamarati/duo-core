@@ -50,3 +50,22 @@ func (r UserMysqlRepository) Save(ctx context.Context, user entity.User) (*int64
 
 	return &id, nil
 }
+
+func (r UserMysqlRepository) FindByUsername(username string) (*entity.User, error) {
+	user := new(entity.User)
+
+	err := r.Db.QueryRow(`
+		SELECT
+			u.id,
+			u.name,
+			u.username,
+			u.password
+		FROM user u
+		WHERE u.username = ?`, username).Scan(&user.ID, &user.Name, &user.Username, &user.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
