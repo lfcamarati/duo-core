@@ -1,32 +1,28 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"github.com/lfcamarati/duo-core/infra/security"
 )
 
-func DefaultHandler(fn func(ctx *gin.Context) ResponseError) gin.HandlerFunc {
+type ControllerEndpoint func(ctx *gin.Context) ResponseError
+type Handler func(ControllerEndpoint) ControllerEndpoint
+
+func DefaultHandler(fn ControllerEndpoint, handlers ...Handler) gin.HandlerFunc {
+	if len(handlers) < 1 {
+		return wrap(fn)
+	}
+
+	wrapped := fn
+
+	for i := len(handlers) - 1; i >= 0; i-- {
+		wrapped = handlers[i](wrapped)
+	}
+
+	return wrap(wrapped)
+}
+
+func wrap(fn ControllerEndpoint) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authorizationHeader := ctx.Request.Header["Authorization"]
-
-		if len(authorizationHeader) == 0 {
-			ctx.Status(http.StatusUnauthorized)
-			return
-		}
-
-		authErr := security.VerifyJWT(authorizationHeader[0])
-
-		if authErr != nil {
-			ctx.Status(http.StatusUnauthorized)
-			return
-		}
-
-		err := fn(ctx)
-
-		if err != nil {
-			ctx.JSON(err.Code(), err)
-		}
+		fn(ctx)
 	}
 }

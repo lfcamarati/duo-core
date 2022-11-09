@@ -19,6 +19,10 @@ type LoginUserUsecaseInput struct {
 	Password string
 }
 
+func (i *LoginUserUsecaseInput) IsInvalid() bool {
+	return i.Username == "" || i.Password == ""
+}
+
 type LoginUserUsecaseOutput struct {
 	Token *string `json:"token"`
 }
@@ -28,13 +32,25 @@ type LoginUserUsecase struct {
 	PasswordEncrypt security.PasswordEncrypt
 }
 
-func (uc *LoginUserUsecase) Execute(input *LoginUserUsecaseInput) (*LoginUserUsecaseOutput, error) {
-	repo := uc.NewRepository()
+var (
+	ErrInvalidCredentials = errors.New("usuário ou senha inválidos")
+	ErrFindUserByUsername = errors.New("erro ao recuperar os dados do usuário")
+)
 
+func (uc *LoginUserUsecase) Execute(input *LoginUserUsecaseInput) (*LoginUserUsecaseOutput, error) {
+	if input.IsInvalid() {
+		return nil, ErrInvalidCredentials
+	}
+
+	repo := uc.NewRepository()
 	user, err := repo.FindByUsername(input.Username)
 
-	if (user == nil || err != nil) || !uc.PasswordEncrypt.CheckEncrypt(input.Password, user.Password) {
-		return nil, errors.New("not authorized")
+	if err != nil {
+		return nil, ErrFindUserByUsername
+	}
+
+	if user == nil || !uc.PasswordEncrypt.CheckEncrypt(input.Password, user.Password) {
+		return nil, ErrInvalidCredentials
 	}
 
 	token, err := security.GenerateJWT(input.Username)

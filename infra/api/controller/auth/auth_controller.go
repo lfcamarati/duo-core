@@ -25,7 +25,11 @@ func Login(ctx *gin.Context) handler.ResponseError {
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		return handler.NewNotAuthorizedError(err.Error())
+		if err == usecase.ErrInvalidCredentials {
+			return handler.NewNotAuthorizedError(err.Error())
+		} else {
+			return handler.NewInternalServerError(err.Error())
+		}
 	}
 
 	ctx.JSON(http.StatusOK, output)
