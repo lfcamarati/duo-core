@@ -3,11 +3,11 @@ package usecase
 import (
 	"errors"
 
-	"github.com/lfcamarati/duo-core/domain/clientpf/entity"
+	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
 )
 
-func NewDeleteClientPfUseCase(repository entity.ClientPfRepository) *DeleteClientPfUseCase {
-	return &DeleteClientPfUseCase{repository}
+func NewDeleteClientPfUseCase(factory repository.ClientPfRepositoryFactory) *DeleteClientPfUseCase {
+	return &DeleteClientPfUseCase{factory}
 }
 
 type DeleteClientPfInput struct {
@@ -17,11 +17,12 @@ type DeleteClientPfInput struct {
 type DeleteClientPfOutput struct{}
 
 type DeleteClientPfUseCase struct {
-	Repository entity.ClientPfRepository
+	NewRepository repository.ClientPfRepositoryFactory
 }
 
 func (uc *DeleteClientPfUseCase) Execute(input DeleteClientPfInput) (*DeleteClientPfOutput, error) {
-	clientPf, err := uc.Repository.GetById(input.ID)
+	repository := uc.NewRepository()
+	clientPf, err := repository.GetById(input.ID)
 
 	if err != nil {
 		return nil, errors.New("cliente não encontrado")
@@ -31,11 +32,14 @@ func (uc *DeleteClientPfUseCase) Execute(input DeleteClientPfInput) (*DeleteClie
 		return nil, errors.New("cliente não encontrado")
 	}
 
-	err = uc.Repository.Delete(input.ID)
+	repository.Begin()
+	err = repository.Delete(input.ID)
 
 	if err != nil {
+		repository.Rollback()
 		return nil, err
 	}
 
+	repository.Commit()
 	return &DeleteClientPfOutput{}, nil
 }

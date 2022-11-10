@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/domain/clientpf/entity"
+	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
 )
 
-func NewUpdateClientPfUseCase(repository entity.ClientPfRepository) *UpdateClientPfUseCase {
+func NewUpdateClientPfUseCase(repository repository.ClientPfRepositoryFactory) *UpdateClientPfUseCase {
 	return &UpdateClientPfUseCase{repository}
 }
 
@@ -20,11 +20,12 @@ type UpdateClientPfUsecaseInput struct {
 type UpdateClientPfUsecaseOutput struct{}
 
 type UpdateClientPfUseCase struct {
-	Repository entity.ClientPfRepository
+	NewRepository repository.ClientPfRepositoryFactory
 }
 
 func (uc *UpdateClientPfUseCase) Execute(input *UpdateClientPfUsecaseInput) (*UpdateClientPfUsecaseOutput, error) {
-	clientPf, err := uc.Repository.GetById(input.ID)
+	repository := uc.NewRepository()
+	clientPf, err := repository.GetById(input.ID)
 
 	if err != nil {
 		return nil, err
@@ -36,11 +37,14 @@ func (uc *UpdateClientPfUseCase) Execute(input *UpdateClientPfUsecaseInput) (*Up
 	clientPf.Email = input.Email
 	clientPf.Phone = input.Phone
 
-	err = uc.Repository.Update(*clientPf)
+	repository.Begin()
+	err = repository.Update(*clientPf)
 
 	if err != nil {
+		repository.Rollback()
 		return nil, err
 	}
 
+	repository.Commit()
 	return &UpdateClientPfUsecaseOutput{}, nil
 }

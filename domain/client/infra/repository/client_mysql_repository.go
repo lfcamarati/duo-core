@@ -5,18 +5,25 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lfcamarati/duo-core/domain/client/entity"
+	"github.com/lfcamarati/duo-core/infra/database"
 )
 
-func NewClientRepository(tx *sql.Tx) entity.ClientRepository {
-	return ClientMysqlRepository{tx}
+func NewClientRepositoryFactory(db *sql.DB) ClientRepositoryFactory {
+	return func() entity.ClientRepository {
+		return &ClientMysqlRepository{
+			&database.GenericTransactor{Db: db},
+		}
+	}
 }
 
+type ClientRepositoryFactory func() entity.ClientRepository
+
 type ClientMysqlRepository struct {
-	Tx *sql.Tx
+	*database.GenericTransactor
 }
 
 func (repository ClientMysqlRepository) GetAll() ([]entity.Client, error) {
-	rows, err := repository.Tx.Query(`
+	rows, err := repository.Db.Query(`
 		SELECT
 			c.id as "id",
 			CASE

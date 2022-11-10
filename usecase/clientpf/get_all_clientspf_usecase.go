@@ -2,10 +2,11 @@ package usecase
 
 import (
 	clientPf "github.com/lfcamarati/duo-core/domain/clientpf/entity"
+	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
 )
 
-func NewGetAllClientsPfUseCase(clientPfRepository clientPf.ClientPfRepository) GetAllClientsPfUseCase {
-	return GetAllClientsPfUseCase{clientPfRepository}
+func NewGetAllClientsPfUseCase(factory repository.ClientPfRepositoryFactory) GetAllClientsPfUseCase {
+	return GetAllClientsPfUseCase{factory}
 }
 
 type GetAllClientsPfUseCaseInput struct{}
@@ -15,11 +16,12 @@ type GetAllClientsPfUseCaseOutput struct {
 }
 
 type GetAllClientsPfUseCase struct {
-	Repository clientPf.ClientPfRepository
+	NewRepository repository.ClientPfRepositoryFactory
 }
 
 func (uc *GetAllClientsPfUseCase) Execute(input GetAllClientsPfUseCaseInput) (*GetAllClientsPfUseCaseOutput, error) {
-	clientsPf, err := uc.Repository.GetAll()
+	repository := uc.NewRepository()
+	clientsPf, err := repository.GetAll()
 
 	if err != nil {
 		return nil, err

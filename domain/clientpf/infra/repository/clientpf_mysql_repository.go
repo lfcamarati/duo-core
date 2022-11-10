@@ -5,14 +5,21 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lfcamarati/duo-core/domain/clientpf/entity"
+	"github.com/lfcamarati/duo-core/infra/database"
 )
 
-func NewClientPfRepository(tx *sql.Tx) entity.ClientPfRepository {
-	return ClientPfMysqlRepository{tx}
+func NewClientPfRepositoryFactory(db *sql.DB) ClientPfRepositoryFactory {
+	return func() entity.ClientPfRepository {
+		return &ClientPfMysqlRepository{
+			&database.GenericTransactor{Db: db},
+		}
+	}
 }
 
+type ClientPfRepositoryFactory func() entity.ClientPfRepository
+
 type ClientPfMysqlRepository struct {
-	Tx *sql.Tx
+	*database.GenericTransactor
 }
 
 func (repository ClientPfMysqlRepository) Save(clientpf entity.ClientPf) (*int64, error) {
@@ -86,7 +93,7 @@ func (repository ClientPfMysqlRepository) Update(clientpf entity.ClientPf) error
 }
 
 func (repository ClientPfMysqlRepository) GetAll() ([]entity.ClientPf, error) {
-	rows, err := repository.Tx.Query(`
+	rows, err := repository.Db.Query(`
 		SELECT
 			c.id as "id",
 			c.type as "type",
@@ -123,7 +130,7 @@ func (repository ClientPfMysqlRepository) GetAll() ([]entity.ClientPf, error) {
 func (repository ClientPfMysqlRepository) GetById(id int64) (*entity.ClientPf, error) {
 	client := new(entity.ClientPf)
 
-	err := repository.Tx.QueryRow(`
+	err := repository.Db.QueryRow(`
 		SELECT
 			c.id as "id",
 			c.type as "type",

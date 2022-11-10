@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 
@@ -20,23 +19,12 @@ func Create(ctx *gin.Context) handler.ResponseError {
 		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
-	tx, err := database.Db.BeginTx(context.TODO(), nil)
-
-	if err != nil {
-		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
-	}
-	defer tx.Rollback()
-
-	repository := repository.NewClientPfRepository(tx)
+	repository := repository.NewClientPfRepositoryFactory(database.Db)
 	uc := usecase.NewCreateClientPfUseCase(repository)
 	output, err := uc.Execute(input)
 
 	if err != nil {
 		return handler.NewUsecaseError("Erro ao registrar cliente: " + err.Error())
-	}
-
-	if err = tx.Commit(); err != nil {
-		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
@@ -57,24 +45,13 @@ func Update(ctx *gin.Context) handler.ResponseError {
 		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
-	tx, err := database.Db.BeginTx(context.TODO(), nil)
-
-	if err != nil {
-		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
-	}
-	defer tx.Rollback()
-
 	input.ID = id
-	repository := repository.NewClientPfRepository(tx)
+	repository := repository.NewClientPfRepositoryFactory(database.Db)
 	uc := usecase.NewUpdateClientPfUseCase(repository)
 	output, err := uc.Execute(input)
 
 	if err != nil {
 		return handler.NewUsecaseError("Erro ao atualizar cliente: " + err.Error())
-	}
-
-	if err = tx.Commit(); err != nil {
-		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
@@ -88,14 +65,7 @@ func GetById(ctx *gin.Context) handler.ResponseError {
 		return handler.NewInternalServerError("Erro ao recuperar cliente: " + err.Error())
 	}
 
-	tx, err := database.Db.BeginTx(context.TODO(), nil)
-
-	if err != nil {
-		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
-	}
-	defer tx.Rollback()
-
-	clientPfRepo := repository.NewClientPfRepository(tx)
+	clientPfRepo := repository.NewClientPfRepositoryFactory(database.Db)
 	input := usecase.GetClientByIdUseCaseInput{ID: id}
 	uc := usecase.NewGetClientByIdUseCase(clientPfRepo)
 	output, err := uc.Execute(input)
@@ -104,33 +74,18 @@ func GetById(ctx *gin.Context) handler.ResponseError {
 		return handler.NewUsecaseError("Erro ao recuperar cliente pelo ID: " + err.Error())
 	}
 
-	if err = tx.Commit(); err != nil {
-		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
-	}
-
 	ctx.JSON(http.StatusOK, output)
 	return nil
 }
 
 func GetAll(ctx *gin.Context) handler.ResponseError {
-	tx, err := database.Db.BeginTx(context.TODO(), nil)
-
-	if err != nil {
-		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
-	}
-	defer tx.Rollback()
-
-	clientPfRepo := repository.NewClientPfRepository(tx)
+	clientPfRepo := repository.NewClientPfRepositoryFactory(database.Db)
 	input := usecase.GetAllClientsPfUseCaseInput{}
 	uc := usecase.NewGetAllClientsPfUseCase(clientPfRepo)
 	output, err := uc.Execute(input)
 
 	if err != nil {
 		return handler.NewUsecaseError("Erro ao recuperar clientes: " + err.Error())
-	}
-
-	if err = tx.Commit(); err != nil {
-		return handler.NewInternalServerError("Erro ao gravar dados: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, output)
@@ -150,24 +105,13 @@ func Delete(ctx *gin.Context) handler.ResponseError {
 		return handler.NewInternalServerError("Erro ao remover cliente: " + err.Error())
 	}
 
-	tx, err := database.Db.BeginTx(context.TODO(), nil)
-
-	if err != nil {
-		return handler.NewInternalServerError("Erro ao iniciar transação: " + err.Error())
-	}
-	defer tx.Rollback()
-
-	clientPfRepo := repository.NewClientPfRepository(tx)
+	clientPfRepo := repository.NewClientPfRepositoryFactory(database.Db)
 	input := usecase.DeleteClientPfInput{ID: id}
 	uc := usecase.NewDeleteClientPfUseCase(clientPfRepo)
 	_, err = uc.Execute(input)
 
 	if err != nil {
 		return handler.NewUsecaseError("Erro ao remover cliente: " + err.Error())
-	}
-
-	if err = tx.Commit(); err != nil {
-		return handler.NewInternalServerError("erro ao remover cliente: " + err.Error())
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)

@@ -1,5 +1,7 @@
 package entity
 
+import "github.com/lfcamarati/duo-core/infra/database"
+
 func NewClientPf(name string, cpf string, address string, email string, phone string) ClientPf {
 	return ClientPf{
 		ID:      nil,
@@ -23,6 +25,8 @@ type ClientPf struct {
 }
 
 type ClientPfRepository interface {
+	database.Transactor
+
 	Save(client ClientPf) (*int64, error)
 	Update(client ClientPf) error
 	GetAll() ([]ClientPf, error)

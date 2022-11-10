@@ -5,7 +5,7 @@ import (
 )
 
 func NewDefaultPasswordEncrypt() PasswordEncrypt {
-	return &PasswordEncryptSha256{}
+	return &BCryptPasswordEncrypt{}
 }
 
 type PasswordEncrypt interface {
@@ -13,15 +13,15 @@ type PasswordEncrypt interface {
 	CheckEncrypt(password string, hash string) bool
 }
 
-type PasswordEncryptSha256 struct {
+type BCryptPasswordEncrypt struct {
 }
 
-func (p *PasswordEncryptSha256) Encrypt(password string) string {
+func (p *BCryptPasswordEncrypt) Encrypt(password string) string {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes)
 }
 
-func (p *PasswordEncryptSha256) CheckEncrypt(password string, hash string) bool {
+func (p *BCryptPasswordEncrypt) CheckEncrypt(password string, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

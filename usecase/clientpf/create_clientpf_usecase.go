@@ -4,9 +4,10 @@ import (
 	"errors"
 
 	"github.com/lfcamarati/duo-core/domain/clientpf/entity"
+	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
 )
 
-func NewCreateClientPfUseCase(repository entity.ClientPfRepository) *CreateClientPfUseCase {
+func NewCreateClientPfUseCase(repository repository.ClientPfRepositoryFactory) *CreateClientPfUseCase {
 	return &CreateClientPfUseCase{repository}
 }
 
@@ -43,11 +44,11 @@ func (i *CreateClientPfUsecaseInput) Validate() error {
 }
 
 type CreateClientPfUsecaseOutput struct {
-	ID *int64
+	ID *int64 `json:"id"`
 }
 
 type CreateClientPfUseCase struct {
-	Repository entity.ClientPfRepository
+	NewRepository repository.ClientPfRepositoryFactory
 }
 
 func (uc *CreateClientPfUseCase) Execute(input *CreateClientPfUsecaseInput) (*CreateClientPfUsecaseOutput, error) {
@@ -57,12 +58,17 @@ func (uc *CreateClientPfUseCase) Execute(input *CreateClientPfUsecaseInput) (*Cr
 		return nil, err
 	}
 
+	repository := uc.NewRepository()
+	repository.Begin()
+
 	clientPf := entity.NewClientPf(*input.Name, *input.Cpf, *input.Address, *input.Email, *input.Phone)
-	ID, err := uc.Repository.Save(clientPf)
+	ID, err := repository.Save(clientPf)
 
 	if err != nil {
+		repository.Rollback()
 		return nil, err
 	}
 
+	repository.Commit()
 	return &CreateClientPfUsecaseOutput{ID}, nil
 }
