@@ -2,20 +2,23 @@ package security
 
 import (
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
 )
 
+type Token struct {
+	Username string
+}
+
 func GenerateJWT(username string) (*string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	claims["sub"] = username
 	claims["authorized"] = true
-	claims["user"] = username
 
 	var secretKey = []byte(viper.GetString("jwt.secretKey"))
 	tokenString, err := token.SignedString(secretKey)
@@ -28,13 +31,41 @@ func GenerateJWT(username string) (*string, error) {
 }
 
 func VerifyJWT(tokenString string) error {
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
-
 	if tokenString == "" {
 		return errors.New("not Authorized")
 	}
 
-	_, err := jwt.Parse(tokenString, func(tokenJwt *jwt.Token) (interface{}, error) {
+	_, err := parse(tokenString)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DecodeJwt(tokenJwt string) (*Token, error) {
+	parsedToken, err := parse(tokenJwt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+
+	if ok && parsedToken.Valid {
+		userToken := Token{
+			Username: claims["sub"].(string),
+		}
+
+		return &userToken, nil
+	}
+
+	return nil, errors.New("error decoding token")
+}
+
+func parse(tokenJwt string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenJwt, func(tokenJwt *jwt.Token) (interface{}, error) {
 		if _, ok := tokenJwt.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("not Authorized")
 		}
@@ -44,9 +75,8 @@ func VerifyJWT(tokenString string) error {
 	})
 
 	if err != nil {
-		println(err.Error())
-		return err
+		return nil, err
 	}
 
-	return nil
+	return token, nil
 }

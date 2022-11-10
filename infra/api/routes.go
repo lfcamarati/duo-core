@@ -21,6 +21,7 @@ func InitRoutes(router *gin.Engine) {
 
 	// Users
 	router.POST("/users", handler.DefaultHandler(userController.Create, defaultHandlers...))
+	router.GET("/users/current", handler.DefaultHandler(userController.GetCurrent, defaultHandlers...))
 
 	// Clients
 	router.GET("/clients", handler.DefaultHandler(clientController.GetAll, defaultHandlers...))

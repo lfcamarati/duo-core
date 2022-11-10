@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lfcamarati/duo-core/infra/security"
@@ -16,7 +17,8 @@ func SecurityHandler(fn ControllerEndpoint) ControllerEndpoint {
 			return nil
 		}
 
-		authErr := security.VerifyJWT(authorizationHeader[0])
+		tokenString := strings.Replace(authorizationHeader[0], "Bearer ", "", 1)
+		authErr := security.VerifyJWT(tokenString)
 
 		if authErr != nil {
 			ctx.Status(http.StatusUnauthorized)
