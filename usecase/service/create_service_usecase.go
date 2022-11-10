@@ -2,10 +2,11 @@ package usecase
 
 import (
 	"github.com/lfcamarati/duo-core/domain/service/entity"
+	"github.com/lfcamarati/duo-core/domain/service/infra/repository"
 )
 
-func NewCreateServiceUsecase(repository entity.ServiceRepository) CreateServiceUsecase {
-	return CreateServiceUsecase{repository}
+func NewCreateServiceUsecase(factory repository.ServiceRepositoryFactory) CreateServiceUsecase {
+	return CreateServiceUsecase{factory}
 }
 
 type CreateServiceUsecaseInput struct {
@@ -19,16 +20,21 @@ type CreateServiceUsecaseOutput struct {
 }
 
 type CreateServiceUsecase struct {
-	Repository entity.ServiceRepository
+	NewRepository repository.ServiceRepositoryFactory
 }
 
 func (uc *CreateServiceUsecase) Execute(input *CreateServiceUsecaseInput) (*CreateServiceUsecaseOutput, error) {
+	repository := uc.NewRepository()
 	service := entity.NewService(input.Title, &input.Description, input.Price)
-	ID, err := uc.Repository.Save(service)
+
+	repository.Begin()
+	ID, err := repository.Save(service)
 
 	if err != nil {
+		repository.Rollback()
 		return nil, err
 	}
 
+	repository.Commit()
 	return &CreateServiceUsecaseOutput{ID}, nil
 }

@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/domain/service/entity"
+	"github.com/lfcamarati/duo-core/domain/service/infra/repository"
 )
 
-func NewUpdateServiceUsecase(repository entity.ServiceRepository) *UpdateServiceUsecase {
-	return &UpdateServiceUsecase{repository}
+func NewUpdateServiceUsecase(factory repository.ServiceRepositoryFactory) *UpdateServiceUsecase {
+	return &UpdateServiceUsecase{factory}
 }
 
 type UpdateServiceUsecaseInput struct {
@@ -18,11 +18,12 @@ type UpdateServiceUsecaseInput struct {
 type UpdateServiceUsecaseOutput struct{}
 
 type UpdateServiceUsecase struct {
-	Repository entity.ServiceRepository
+	NewRepository repository.ServiceRepositoryFactory
 }
 
 func (uc *UpdateServiceUsecase) Execute(input UpdateServiceUsecaseInput) (*UpdateServiceUsecaseOutput, error) {
-	service, err := uc.Repository.GetById(input.ID)
+	repository := uc.NewRepository()
+	service, err := repository.GetById(input.ID)
 
 	if err != nil {
 		return nil, err
@@ -32,11 +33,14 @@ func (uc *UpdateServiceUsecase) Execute(input UpdateServiceUsecaseInput) (*Updat
 	service.Description = &input.Description
 	service.Price = input.Price
 
-	err = uc.Repository.Update(*service)
+	repository.Begin()
+	err = repository.Update(*service)
 
 	if err != nil {
+		repository.Rollback()
 		return nil, err
 	}
 
+	repository.Commit()
 	return &UpdateServiceUsecaseOutput{}, nil
 }

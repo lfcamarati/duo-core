@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/domain/service/entity"
+	"github.com/lfcamarati/duo-core/domain/service/infra/repository"
 )
 
-func NewDeleteServiceUseCase(repository entity.ServiceRepository) DeleteServiceUseCase {
-	return DeleteServiceUseCase{repository}
+func NewDeleteServiceUseCase(factory repository.ServiceRepositoryFactory) DeleteServiceUseCase {
+	return DeleteServiceUseCase{factory}
 }
 
 type DeleteServiceInput struct {
@@ -15,15 +15,19 @@ type DeleteServiceInput struct {
 type DeleteServiceOutput struct{}
 
 type DeleteServiceUseCase struct {
-	Repository entity.ServiceRepository
+	NewRepository repository.ServiceRepositoryFactory
 }
 
 func (uc *DeleteServiceUseCase) Execute(input DeleteServiceInput) (*DeleteServiceOutput, error) {
-	err := uc.Repository.Delete(input.ID)
+	repository := uc.NewRepository()
+	repository.Begin()
+	err := repository.Delete(input.ID)
 
 	if err != nil {
+		repository.Rollback()
 		return nil, err
 	}
 
+	repository.Commit()
 	return &DeleteServiceOutput{}, nil
 }

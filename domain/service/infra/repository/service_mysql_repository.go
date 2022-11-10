@@ -5,14 +5,21 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lfcamarati/duo-core/domain/service/entity"
+	"github.com/lfcamarati/duo-core/infra/database"
 )
 
-func NewServiceRepository(tx *sql.Tx) entity.ServiceRepository {
-	return ServiceMysqlRepository{tx}
+func NewServiceRepositoryFactory(db *sql.DB) ServiceRepositoryFactory {
+	return func() entity.ServiceRepository {
+		return &ServiceMysqlRepository{
+			&database.GenericTransactor{Db: db},
+		}
+	}
 }
 
+type ServiceRepositoryFactory func() entity.ServiceRepository
+
 type ServiceMysqlRepository struct {
-	Tx *sql.Tx
+	*database.GenericTransactor
 }
 
 func (repository ServiceMysqlRepository) Save(service entity.Service) (*int64, error) {
@@ -58,7 +65,7 @@ func (repository ServiceMysqlRepository) Update(service entity.Service) error {
 }
 
 func (repository ServiceMysqlRepository) GetAll() ([]entity.Service, error) {
-	rows, err := repository.Tx.Query(`
+	rows, err := repository.Db.Query(`
 		SELECT
 			s.id as "id",
 			s.title as "title",
@@ -91,7 +98,7 @@ func (repository ServiceMysqlRepository) GetAll() ([]entity.Service, error) {
 func (repository ServiceMysqlRepository) GetById(id int64) (*entity.Service, error) {
 	service := new(entity.Service)
 
-	err := repository.Tx.QueryRow(`
+	err := repository.Db.QueryRow(`
 		SELECT
 			s.id as "id",
 			s.title as "title",

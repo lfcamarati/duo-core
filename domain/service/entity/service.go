@@ -1,5 +1,7 @@
 package entity
 
+import "github.com/lfcamarati/duo-core/infra/database"
+
 func NewService(title string, description *string, price float64) Service {
 	return Service{
 		Title:       title,
@@ -16,6 +18,8 @@ type Service struct {
 }
 
 type ServiceRepository interface {
+	database.Transactor
+
 	Save(service Service) (*int64, error)
 	Update(service Service) error
 	GetAll() ([]Service, error)

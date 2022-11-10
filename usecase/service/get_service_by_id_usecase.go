@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/domain/service/entity"
+	"github.com/lfcamarati/duo-core/domain/service/infra/repository"
 )
 
-func NewGetServiceByIdUseCase(clientPfRepository entity.ServiceRepository) GetServiceByIdUseCase {
-	return GetServiceByIdUseCase{clientPfRepository}
+func NewGetServiceByIdUseCase(factory repository.ServiceRepositoryFactory) GetServiceByIdUseCase {
+	return GetServiceByIdUseCase{factory}
 }
 
 type GetServiceByIdUseCaseInput struct {
@@ -20,11 +20,12 @@ type GetServiceByIdUseCaseOutput struct {
 }
 
 type GetServiceByIdUseCase struct {
-	Repository entity.ServiceRepository
+	NewRepository repository.ServiceRepositoryFactory
 }
 
 func (uc *GetServiceByIdUseCase) Execute(input GetServiceByIdUseCaseInput) (*GetServiceByIdUseCaseOutput, error) {
-	service, err := uc.Repository.GetById(input.ID)
+	repository := uc.NewRepository()
+	service, err := repository.GetById(input.ID)
 
 	if err != nil {
 		return nil, err

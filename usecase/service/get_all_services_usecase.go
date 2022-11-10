@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/domain/service/entity"
+	"github.com/lfcamarati/duo-core/domain/service/infra/repository"
 )
 
-func NewGetAllServicesUseCase(clientPjRepository entity.ServiceRepository) GetAllServicesUseCase {
-	return GetAllServicesUseCase{clientPjRepository}
+func NewGetAllServicesUseCase(factory repository.ServiceRepositoryFactory) GetAllServicesUseCase {
+	return GetAllServicesUseCase{factory}
 }
 
 type GetAllServicesUseCaseInput struct{}
@@ -22,11 +22,12 @@ type GetAllServicesUseCaseOutput struct {
 }
 
 type GetAllServicesUseCase struct {
-	Repository entity.ServiceRepository
+	NewRepository repository.ServiceRepositoryFactory
 }
 
 func (uc *GetAllServicesUseCase) Execute(input GetAllServicesUseCaseInput) (*GetAllServicesUseCaseOutput, error) {
-	services, err := uc.Repository.GetAll()
+	repository := uc.NewRepository()
+	services, err := repository.GetAll()
 
 	if err != nil {
 		return nil, err
