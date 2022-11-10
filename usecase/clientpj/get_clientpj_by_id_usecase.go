@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/domain/clientpj/entity"
+	"github.com/lfcamarati/duo-core/domain/clientpj/infra/repository"
 )
 
-func NewGetClientPjByIdUseCase(clientPfRepository entity.ClientPjRepository) GetClientPjByIdUseCase {
-	return GetClientPjByIdUseCase{clientPfRepository}
+func NewGetClientPjByIdUseCase(factory repository.ClientPjRepositoryFactory) GetClientPjByIdUseCase {
+	return GetClientPjByIdUseCase{factory}
 }
 
 type GetClientPjByIdUseCaseInput struct {
@@ -22,11 +22,12 @@ type GetClientPjByIdUseCaseOutput struct {
 }
 
 type GetClientPjByIdUseCase struct {
-	Repository entity.ClientPjRepository
+	NewRepository repository.ClientPjRepositoryFactory
 }
 
 func (uc *GetClientPjByIdUseCase) Execute(input GetClientPjByIdUseCaseInput) (*GetClientPjByIdUseCaseOutput, error) {
-	clientPj, err := uc.Repository.GetById(input.ID)
+	repository := uc.NewRepository()
+	clientPj, err := repository.GetById(input.ID)
 
 	if err != nil {
 		return nil, err

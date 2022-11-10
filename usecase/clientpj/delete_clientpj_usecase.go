@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"github.com/lfcamarati/duo-core/domain/clientpj/entity"
+	"github.com/lfcamarati/duo-core/domain/clientpj/infra/repository"
 )
 
-func NewDeleteClientPjUseCase(repository entity.ClientPjRepository) *DeleteClientPjUseCase {
-	return &DeleteClientPjUseCase{repository}
+func NewDeleteClientPjUseCase(factory repository.ClientPjRepositoryFactory) *DeleteClientPjUseCase {
+	return &DeleteClientPjUseCase{factory}
 }
 
 type DeleteClientPjInput struct {
@@ -15,15 +15,20 @@ type DeleteClientPjInput struct {
 type DeleteClientPjOutput struct{}
 
 type DeleteClientPjUseCase struct {
-	Repository entity.ClientPjRepository
+	NewRepository repository.ClientPjRepositoryFactory
 }
 
 func (uc *DeleteClientPjUseCase) Execute(input DeleteClientPjInput) (*DeleteClientPjOutput, error) {
-	err := uc.Repository.Delete(input.ID)
+	repository := uc.NewRepository()
+	repository.Begin()
+
+	err := repository.Delete(input.ID)
 
 	if err != nil {
+		repository.Rollback()
 		return nil, err
 	}
 
+	repository.Commit()
 	return &DeleteClientPjOutput{}, nil
 }

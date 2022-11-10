@@ -5,14 +5,21 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lfcamarati/duo-core/domain/clientpj/entity"
+	"github.com/lfcamarati/duo-core/infra/database"
 )
 
-func NewClientPjRepository(tx *sql.Tx) entity.ClientPjRepository {
-	return ClientPjMysqlRepository{tx}
+func NewClientPjRepositoryFactory(db *sql.DB) ClientPjRepositoryFactory {
+	return func() entity.ClientPjRepository {
+		return &ClientPjMysqlRepository{
+			&database.GenericTransactor{Db: db},
+		}
+	}
 }
 
+type ClientPjRepositoryFactory func() entity.ClientPjRepository
+
 type ClientPjMysqlRepository struct {
-	Tx *sql.Tx
+	*database.GenericTransactor
 }
 
 func (repository ClientPjMysqlRepository) Save(clientpj entity.ClientPj) (*int64, error) {
@@ -86,7 +93,7 @@ func (repository ClientPjMysqlRepository) Update(clientpj entity.ClientPj) error
 }
 
 func (repository ClientPjMysqlRepository) GetAll() ([]entity.ClientPj, error) {
-	rows, err := repository.Tx.Query(`
+	rows, err := repository.Db.Query(`
 		SELECT
 			c.id as "id",
 			c.type as "type",
@@ -123,7 +130,7 @@ func (repository ClientPjMysqlRepository) GetAll() ([]entity.ClientPj, error) {
 func (repository ClientPjMysqlRepository) GetById(id int64) (*entity.ClientPj, error) {
 	client := new(entity.ClientPj)
 
-	err := repository.Tx.QueryRow(`
+	err := repository.Db.QueryRow(`
 		SELECT
 			c.id as "id",
 			c.type as "type",
