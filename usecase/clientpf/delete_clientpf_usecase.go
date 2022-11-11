@@ -22,6 +22,12 @@ type DeleteClientPfUseCase struct {
 
 func (uc *DeleteClientPfUseCase) Execute(input DeleteClientPfInput) (*DeleteClientPfOutput, error) {
 	repository := uc.NewRepository()
+
+	if err := repository.Begin(); err != nil {
+		return nil, err
+	}
+	defer repository.Rollback()
+
 	clientPf, err := repository.GetById(input.ID)
 
 	if err != nil {
@@ -32,14 +38,15 @@ func (uc *DeleteClientPfUseCase) Execute(input DeleteClientPfInput) (*DeleteClie
 		return nil, errors.New("cliente não encontrado")
 	}
 
-	repository.Begin()
 	err = repository.Delete(input.ID)
 
 	if err != nil {
-		repository.Rollback()
 		return nil, err
 	}
 
-	repository.Commit()
+	if err := repository.Commit(); err != nil {
+		return nil, err
+	}
+
 	return &DeleteClientPfOutput{}, nil
 }

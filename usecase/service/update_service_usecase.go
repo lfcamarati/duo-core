@@ -23,6 +23,12 @@ type UpdateServiceUsecase struct {
 
 func (uc *UpdateServiceUsecase) Execute(input UpdateServiceUsecaseInput) (*UpdateServiceUsecaseOutput, error) {
 	repository := uc.NewRepository()
+
+	if err := repository.Begin(); err != nil {
+		return nil, err
+	}
+	defer repository.Rollback()
+
 	service, err := repository.GetById(input.ID)
 
 	if err != nil {
@@ -33,14 +39,15 @@ func (uc *UpdateServiceUsecase) Execute(input UpdateServiceUsecaseInput) (*Updat
 	service.Description = &input.Description
 	service.Price = input.Price
 
-	repository.Begin()
 	err = repository.Update(*service)
 
 	if err != nil {
-		repository.Rollback()
 		return nil, err
 	}
 
-	repository.Commit()
+	if err := repository.Commit(); err != nil {
+		return nil, err
+	}
+
 	return &UpdateServiceUsecaseOutput{}, nil
 }

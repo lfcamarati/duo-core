@@ -27,18 +27,23 @@ type CreateClientPjUseCase struct {
 }
 
 func (uc *CreateClientPjUseCase) Execute(input *CreateClientPjInput) (*CreateClientPjOutput, error) {
-	clientPj := entity.NewClientPj(input.CorporateName, input.Cnpj, input.Address, input.Email, input.Phone)
-
 	repository := uc.NewRepository()
-	repository.Begin()
 
+	if err := repository.Begin(); err != nil {
+		return nil, err
+	}
+	defer repository.Rollback()
+
+	clientPj := entity.NewClientPj(input.CorporateName, input.Cnpj, input.Address, input.Email, input.Phone)
 	ID, err := repository.Save(clientPj)
 
 	if err != nil {
-		repository.Rollback()
 		return nil, err
 	}
 
-	repository.Commit()
+	if err := repository.Commit(); err != nil {
+		return nil, err
+	}
+
 	return &CreateClientPjOutput{ID}, nil
 }

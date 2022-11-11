@@ -25,6 +25,12 @@ type UpdateClientPfUseCase struct {
 
 func (uc *UpdateClientPfUseCase) Execute(input *UpdateClientPfUsecaseInput) (*UpdateClientPfUsecaseOutput, error) {
 	repository := uc.NewRepository()
+
+	if err := repository.Begin(); err != nil {
+		return nil, err
+	}
+	defer repository.Rollback()
+
 	clientPf, err := repository.GetById(input.ID)
 
 	if err != nil {
@@ -37,14 +43,15 @@ func (uc *UpdateClientPfUseCase) Execute(input *UpdateClientPfUsecaseInput) (*Up
 	clientPf.Email = input.Email
 	clientPf.Phone = input.Phone
 
-	repository.Begin()
 	err = repository.Update(*clientPf)
 
 	if err != nil {
-		repository.Rollback()
 		return nil, err
 	}
 
-	repository.Commit()
+	if err := repository.Commit(); err != nil {
+		return nil, err
+	}
+
 	return &UpdateClientPfUsecaseOutput{}, nil
 }

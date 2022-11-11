@@ -20,14 +20,21 @@ type DeleteServiceUseCase struct {
 
 func (uc *DeleteServiceUseCase) Execute(input DeleteServiceInput) (*DeleteServiceOutput, error) {
 	repository := uc.NewRepository()
-	repository.Begin()
+
+	if err := repository.Begin(); err != nil {
+		return nil, err
+	}
+	defer repository.Rollback()
+
 	err := repository.Delete(input.ID)
 
 	if err != nil {
-		repository.Rollback()
 		return nil, err
 	}
 
-	repository.Commit()
+	if err := repository.Commit(); err != nil {
+		return nil, err
+	}
+
 	return &DeleteServiceOutput{}, nil
 }
