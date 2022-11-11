@@ -4,8 +4,8 @@ import (
 	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
 )
 
-func NewUpdateClientPfUseCase(repository repository.ClientPfRepositoryFactory) *UpdateClientPfUseCase {
-	return &UpdateClientPfUseCase{repository}
+func NewUpdateClientPfUseCase(factory repository.ClientPfRepositoryFactory) *UpdateClientPfUseCase {
+	return &UpdateClientPfUseCase{factory}
 }
 
 type UpdateClientPfUsecaseInput struct {

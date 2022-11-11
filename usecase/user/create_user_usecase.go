@@ -9,13 +9,10 @@ import (
 )
 
 func NewCreateUserUsecase(
-	repositoryFactory repository.UserRepositoryFactory,
+	factory repository.UserRepositoryFactory,
 	passwordEncrypt security.PasswordEncrypt,
 ) CreateUserUsecase {
-	return CreateUserUsecase{
-		repositoryFactory,
-		passwordEncrypt,
-	}
+	return CreateUserUsecase{factory, passwordEncrypt}
 }
 
 type CreateUserUsecaseInput struct {

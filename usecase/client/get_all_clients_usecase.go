@@ -4,8 +4,8 @@ import (
 	"github.com/lfcamarati/duo-core/domain/client/infra/repository"
 )
 
-func NewGetAllClientsUseCase(repository repository.ClientRepositoryFactory) *GetAllClientsUseCase {
-	return &GetAllClientsUseCase{repository}
+func NewGetAllClientsUseCase(factory repository.ClientRepositoryFactory) *GetAllClientsUseCase {
+	return &GetAllClientsUseCase{factory}
 }
 
 type GetAllClientsUsecaseInput struct{}

@@ -5,9 +5,9 @@ import (
 )
 
 func NewGetCurrentUserUsecase(
-	repositoryFactory repository.UserRepositoryFactory,
+	factory repository.UserRepositoryFactory,
 ) *GetCurrentUserUsecase {
-	return &GetCurrentUserUsecase{repositoryFactory}
+	return &GetCurrentUserUsecase{factory}
 }
 
 type GetCurrentUserUsecaseInput struct {

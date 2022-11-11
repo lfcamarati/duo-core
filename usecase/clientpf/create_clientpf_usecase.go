@@ -7,8 +7,8 @@ import (
 	"github.com/lfcamarati/duo-core/domain/clientpf/infra/repository"
 )
 
-func NewCreateClientPfUseCase(repository repository.ClientPfRepositoryFactory) *CreateClientPfUseCase {
-	return &CreateClientPfUseCase{repository}
+func NewCreateClientPfUseCase(factory repository.ClientPfRepositoryFactory) *CreateClientPfUseCase {
+	return &CreateClientPfUseCase{factory}
 }
 
 type CreateClientPfUsecaseInput struct {

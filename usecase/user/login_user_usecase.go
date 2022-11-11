@@ -8,10 +8,10 @@ import (
 )
 
 func NewLoginUsecase(
-	repositoryFactory repository.UserRepositoryFactory,
+	factory repository.UserRepositoryFactory,
 	passwordEncrypt security.PasswordEncrypt,
 ) LoginUserUsecase {
-	return LoginUserUsecase{repositoryFactory, passwordEncrypt}
+	return LoginUserUsecase{factory, passwordEncrypt}
 }
 
 type LoginUserUsecaseInput struct {
