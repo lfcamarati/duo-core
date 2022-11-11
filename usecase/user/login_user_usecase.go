@@ -46,7 +46,7 @@ func (uc *LoginUserUsecase) Execute(input *LoginUserUsecaseInput) (*LoginUserUse
 	user, err := repo.FindByUsername(input.Username)
 
 	if err != nil {
-		return nil, ErrFindUserByUsername
+		return nil, ErrInvalidCredentials
 	}
 
 	if user == nil || !uc.PasswordEncrypt.CheckEncrypt(input.Password, user.Password) {
