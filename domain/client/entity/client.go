@@ -8,4 +8,5 @@ type Client struct {
 
 type ClientRepository interface {
 	GetAll() ([]Client, error)
+	GetById(id int64) (*Client, error)
 }

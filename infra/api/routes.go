@@ -25,6 +25,7 @@ func InitRoutes(router *gin.Engine) {
 
 	// Clients
 	router.GET("/clients", handler.DefaultHandler(clientController.GetAll, defaultHandlers...))
+	router.GET("/clients/:id", handler.DefaultHandler(clientController.GetById, defaultHandlers...))
 
 	// ClientsPf
 	router.GET("/clients-pf/:id", handler.DefaultHandler(clientPfController.GetById, defaultHandlers...))
