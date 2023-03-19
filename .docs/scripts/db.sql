@@ -1,33 +1,11 @@
 CREATE TABLE client (
   id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  cpfCnpj VARCHAR(14) NOT NULL,
   address VARCHAR(255) NOT NULL,
   email VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
   type VARCHAR(2) NOT NULL,
-  PRIMARY KEY (id)
-);
-
-CREATE TABLE client_pf (
-  id INT NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  cpf VARCHAR(11) NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (id) REFERENCES client(id)
-);
-
-CREATE TABLE client_pj (
-  id INT NOT NULL,
-  corporate_name VARCHAR(255) NOT NULL,
-  cnpj VARCHAR(14) NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (id) REFERENCES client(id)
-);
-
-CREATE TABLE service (
-  id INT NOT NULL AUTO_INCREMENT,
-  title VARCHAR(255) NOT NULL,
-  description VARCHAR(255),
-  price DECIMAL(10,2) NOT NULL,
   PRIMARY KEY (id)
 );
 
@@ -39,3 +17,34 @@ CREATE TABLE user (
   PRIMARY KEY (id),
   UNIQUE (username)
 );
+
+CREATE TABLE service (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(30) NOT NULL,
+  description VARCHAR(255),
+  price DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE social_media_management (
+  id INT NOT NULL,
+  week_frequency INT NOT NULL,
+  plan_type VARCHAR(10) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (id) REFERENCES service(id)
+);
+
+-- !! REAVALIAR !!
+-- CREATE TABLE contracted_service (
+--   id INT NOT NULL AUTO_INCREMENT,
+--   id_contract INT NOT NULL,
+--   id_service INT NOT NULL,
+--   title VARCHAR(255) NOT NULL,
+--   description VARCHAR(255),
+--   price DECIMAL(10,2) NOT NULL,
+  
+--   PRIMARY KEY (id),
+--   FOREIGN KEY (id_contract) REFERENCES contract(id)
+--   FOREIGN KEY (id_service) REFERENCES service(id)
+-- );

@@ -1,15 +1,15 @@
-package client
+package user
 
 import (
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lfcamarati/duo-core/domain/user/infra/repository"
+	usecase "github.com/lfcamarati/duo-core/application/user"
 	"github.com/lfcamarati/duo-core/infra/api/handler"
 	"github.com/lfcamarati/duo-core/infra/database"
+	userInfra "github.com/lfcamarati/duo-core/infra/domain/user"
 	"github.com/lfcamarati/duo-core/infra/security"
-	usecase "github.com/lfcamarati/duo-core/usecase/user"
 )
 
 func Create(ctx *gin.Context) handler.ResponseError {
@@ -20,7 +20,7 @@ func Create(ctx *gin.Context) handler.ResponseError {
 		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
-	userRepo := repository.NewUserRepositoryFactory(database.Db)
+	userRepo := userInfra.NewUserRepositoryFactory(database.Db)
 	passwordEncrypt := security.NewDefaultPasswordEncrypt()
 	uc := usecase.NewCreateUserUsecase(userRepo, passwordEncrypt)
 	output, err := uc.Execute(input)
@@ -46,7 +46,7 @@ func GetCurrent(ctx *gin.Context) handler.ResponseError {
 		return handler.NewUsecaseError("Erro ao recuperar usuaŕio logado: " + err.Error())
 	}
 
-	repoFactory := repository.NewUserRepositoryFactory(database.Db)
+	repoFactory := userInfra.NewUserRepositoryFactory(database.Db)
 	input := usecase.GetCurrentUserUsecaseInput{Username: userToken.Username}
 	uc := usecase.NewGetCurrentUserUsecase(repoFactory)
 	output, err := uc.Execute(input)

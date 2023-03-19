@@ -1,31 +1,31 @@
-package client
+package auth
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lfcamarati/duo-core/domain/user/infra/repository"
+	userService "github.com/lfcamarati/duo-core/application/user"
 	"github.com/lfcamarati/duo-core/infra/api/handler"
 	"github.com/lfcamarati/duo-core/infra/database"
+	userInfra "github.com/lfcamarati/duo-core/infra/domain/user"
 	"github.com/lfcamarati/duo-core/infra/security"
-	usecase "github.com/lfcamarati/duo-core/usecase/user"
 )
 
 func Login(ctx *gin.Context) handler.ResponseError {
-	input := new(usecase.LoginUserUsecaseInput)
+	input := new(userService.LoginUserUsecaseInput)
 	err := ctx.Bind(input)
 
 	if err != nil {
 		return handler.NewBadRequest("Erro ao ler dados de entrada: " + err.Error())
 	}
 
-	userRepo := repository.NewUserRepositoryFactory(database.Db)
+	userRepo := userInfra.NewUserRepositoryFactory(database.Db)
 	passwordEncrypt := security.NewDefaultPasswordEncrypt()
-	uc := usecase.NewLoginUsecase(userRepo, passwordEncrypt)
+	uc := userService.NewLoginUsecase(userRepo, passwordEncrypt)
 	output, err := uc.Execute(input)
 
 	if err != nil {
-		if err == usecase.ErrInvalidCredentials {
+		if err == userService.ErrInvalidCredentials {
 			return handler.NewNotAuthorizedError(err.Error())
 		} else {
 			return handler.NewInternalServerError(err.Error())
