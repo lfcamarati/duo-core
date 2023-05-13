@@ -6,6 +6,7 @@ import (
 	authController "github.com/lfcamarati/duo-core/infra/api/controller/auth"
 	clientController "github.com/lfcamarati/duo-core/infra/api/controller/client"
 	serviceController "github.com/lfcamarati/duo-core/infra/api/controller/service"
+	serviceClientController "github.com/lfcamarati/duo-core/infra/api/controller/serviceclient"
 	userController "github.com/lfcamarati/duo-core/infra/api/controller/user"
 	"github.com/lfcamarati/duo-core/infra/api/handler"
 )
@@ -29,6 +30,9 @@ func InitRoutes(router *gin.Engine) {
 	routerGroup.POST("/clients", handler.DefaultHandler(clientController.Create, defaultHandlers...))
 	routerGroup.PUT("/clients/:id", handler.DefaultHandler(clientController.Update, defaultHandlers...))
 	routerGroup.DELETE("/clients/:id", handler.DefaultHandler(clientController.Delete, defaultHandlers...))
+
+	// Services Client
+	routerGroup.POST("/services-client", handler.DefaultHandler(serviceClientController.Register, defaultHandlers...))
 
 	// Services
 	routerGroup.GET("/services/:id", handler.DefaultHandler(serviceController.GetById, defaultHandlers...))

@@ -1,14 +1,3 @@
-CREATE TABLE client (
-  id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(255) NOT NULL,
-  cpfCnpj VARCHAR(14) NOT NULL,
-  address VARCHAR(255) NOT NULL,
-  email VARCHAR(100) NOT NULL,
-  phone VARCHAR(20) NOT NULL,
-  type VARCHAR(2) NOT NULL,
-  PRIMARY KEY (id)
-);
-
 CREATE TABLE user (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
@@ -16,6 +5,36 @@ CREATE TABLE user (
   password VARCHAR(255) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE (username)
+);
+
+CREATE TABLE client (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  cpfCnpj VARCHAR(14) NOT NULL,
+  address VARCHAR(255),
+  email VARCHAR(100),
+  phone VARCHAR(20),
+  type VARCHAR(2) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE service_client (
+  id INT NOT NULL AUTO_INCREMENT,
+  id_client INT NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  period_type VARCHAR(15) NOT NULL,
+  week_days VARCHAR(30),
+  specific_date DATE,
+  PRIMARY KEY (id),
+  FOREIGN KEY (id_client) REFERENCES client(id),
+  CONSTRAINT chk_period_type CHECK (period_type IN ('WEEKLY', 'SPECIFIC_DATE')),
+  CONSTRAINT chk_week_days CHECK (
+  	(period_type = 'WEEKLY' AND week_days IS NOT NULL) OR (period_type <> 'WEEKLY' AND week_days IS NULL)
+	),
+  CONSTRAINT chk_specific_date CHECK (
+  	(period_type = 'SPECIFIC_DATE' AND specific_date IS NOT NULL) OR (period_type <> 'SPECIFIC_DATE' AND specific_date IS NULL)
+	)
 );
 
 CREATE TABLE service (
@@ -35,7 +54,7 @@ CREATE TABLE social_media_management (
   FOREIGN KEY (id) REFERENCES service(id)
 );
 
--- !! REAVALIAR !!
+-- ! REAVALIAR
 -- CREATE TABLE contracted_service (
 --   id INT NOT NULL AUTO_INCREMENT,
 --   id_contract INT NOT NULL,

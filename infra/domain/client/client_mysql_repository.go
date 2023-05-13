@@ -45,7 +45,7 @@ func (repository ClientMysqlRepository) GetAll() ([]client.Client, error) {
 	for rows.Next() {
 		var client client.Client
 		err := rows.Scan(
-			&client.ID,
+			&client.Id,
 			&client.Name,
 			&client.CpfCnpj,
 			&client.Address,
@@ -81,7 +81,7 @@ func (repository ClientMysqlRepository) GetById(id int64) (*client.Client, error
 		WHERE
 			c.id = ?
 	`, id).Scan(
-		&client.ID,
+		&client.Id,
 		&client.Name,
 		&client.CpfCnpj,
 		&client.Address,
@@ -98,7 +98,13 @@ func (repository ClientMysqlRepository) GetById(id int64) (*client.Client, error
 }
 
 func (repository ClientMysqlRepository) Save(client client.Client) (*int64, error) {
-	stmt, err := repository.Tx.Prepare("INSERT INTO client (name, cpfCnpj, address, email, phone, type) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := repository.Tx.Prepare(`
+		INSERT INTO client (
+			name, cpfCnpj, address, email, phone, type
+		) VALUES (
+			?, ?, ?, ?, ?, ?
+		)
+	`)
 
 	if err != nil {
 		return nil, err
@@ -122,7 +128,7 @@ func (repository ClientMysqlRepository) Save(client client.Client) (*int64, erro
 func (repository ClientMysqlRepository) Update(client client.Client) error {
 	stmt, err := repository.Tx.Prepare(`
 		UPDATE client
-		SET name = ?, cpfCnpj = ?, address = ?, email = ?, phone = ?
+		SET name = ?, cpfCnpj = ?, address = ?, email = ?, phone = ?, type = ?
 		WHERE id = ?
 	`)
 
@@ -131,7 +137,7 @@ func (repository ClientMysqlRepository) Update(client client.Client) error {
 	}
 
 	_, err = stmt.Exec(
-		client.Name, client.CpfCnpj, client.Address, client.Email, client.Phone, client.ID,
+		client.Name, client.CpfCnpj, client.Address, client.Email, client.Phone, client.Type, client.Id,
 	)
 
 	if err != nil {

@@ -4,9 +4,9 @@ import (
 	clientDomain "github.com/lfcamarati/duo-core/domain/client"
 )
 
-func NewClientResource(client clientDomain.Client) ClientResource {
+func newClientResource(client clientDomain.Client) ClientResource {
 	return ClientResource{
-		ID:      *client.ID,
+		Id:      int64(*client.Id),
 		Name:    client.Name,
 		CpfCnpj: client.CpfCnpj,
 		Address: client.Address,
@@ -16,18 +16,18 @@ func NewClientResource(client clientDomain.Client) ClientResource {
 	}
 }
 
-func NewClientListResource(clients []clientDomain.Client) ClientListResource {
-	clientsResource := make([]ClientResource, 0)
+func newClientListResource(clients []clientDomain.Client) ClientListResource {
+	clientListResource := make([]ClientResource, 0)
 
-	for _, c := range clients {
-		clientsResource = append(clientsResource, NewClientResource(c))
+	for _, client := range clients {
+		clientListResource = append(clientListResource, newClientResource(client))
 	}
 
-	return ClientListResource{clientsResource}
+	return ClientListResource{clientListResource}
 }
 
 type ClientResource struct {
-	ID      int64  `json:"id"`
+	Id      int64  `json:"id"`
 	Name    string `json:"name"`
 	CpfCnpj string `json:"cpfCnpj"`
 	Address string `json:"address"`

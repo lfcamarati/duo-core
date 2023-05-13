@@ -18,7 +18,7 @@ func GenerateJWT(username string) (*string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 	claims["sub"] = username
-	claims["authorized"] = true
+	claims["iat"] = time.Now().Unix()
 
 	var secretKey = []byte(viper.GetString("jwt.secretKey"))
 	tokenString, err := token.SignedString(secretKey)

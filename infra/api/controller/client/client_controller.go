@@ -20,7 +20,7 @@ func GetAll(ctx *gin.Context) handler.ResponseError {
 		return handler.NewUsecaseError("Erro ao recuperar clientes: " + err.Error())
 	}
 
-	clientListResource := NewClientListResource(clients)
+	clientListResource := newClientListResource(clients)
 	ctx.JSON(http.StatusOK, clientListResource)
 	return nil
 }
@@ -40,7 +40,7 @@ func GetById(ctx *gin.Context) handler.ResponseError {
 		return handler.NewUsecaseError("Erro ao recuperar cliente pelo ID: " + err.Error())
 	}
 
-	ctx.JSON(http.StatusOK, NewClientResource(*client))
+	ctx.JSON(http.StatusOK, newClientResource(*client))
 	return nil
 }
 
